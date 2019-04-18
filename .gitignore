@@ -9,6 +9,4 @@ android/.gradle/
 android/gradlew
 android/gradlew.bat
 build/
-android/src/main/kotlin/com/
-example/android/app/src/main/kotlin/com/
 example/pubspec.lock
