@@ -1,11 +1,12 @@
 import Flutter
 import UIKit
+import Photos
 
 public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin {
   let manager:PHCachingImageManager = PHCachingImageManager.init();
       public static func register(with registrar: FlutterPluginRegistrar) {
           let channel = FlutterMethodChannel(name: "image_picker", binaryMessenger: registrar.messenger())
-          let instance = SwiftImagePickerPlugin()
+          let instance = SwiftImagePickerFlutterPlugin()
           registrar.addMethodCallDelegate(instance, channel: channel)
       }
 
@@ -91,7 +92,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin {
               if(image == nil){
                   result(nil);
               }else{
-                  result(image?.jpegData(compressionQuality: 75));
+                result(image?.jpegData(compressionQuality: 75));
               }
           })
 

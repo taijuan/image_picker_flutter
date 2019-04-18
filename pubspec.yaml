@@ -1,6 +1,6 @@
 name: image_picker_flutter
 description: A Flutter plugin for iOS and Android for picking images from the image library.
-version: 1.0.3+1
+version: 1.0.3+2
 author: taijuan <673636090@qq.com>
 homepage: https://github.com/taijuan/ImagePickerFlutter.git
 
@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-flutter:
 
+flutter:
   plugin:
     androidPackage: com.taijuan.image_picker_flutter
     pluginClass: ImagePickerFlutterPlugin
