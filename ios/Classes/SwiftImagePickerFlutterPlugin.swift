@@ -27,38 +27,40 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin {
       }
 
       private func getImages(type:Int,result:@escaping FlutterResult){
-          var arr = Array<Dictionary<String,Any>>();
-          if(type == 1 || type == 3){
-              let all =  PHAsset.fetchAssets(with: .image, options: nil);
-              for index in 0..<all.count{
-                  let a = all[index];
-                  var d:Dictionary<String,Any> = Dictionary<String,Any>();
-                  d.updateValue(a.localIdentifier, forKey: "id")
-                  d.updateValue("image/",forKey: "mimeType");
-                  d.updateValue(a.pixelWidth,forKey: "width");
-                  d.updateValue(a.pixelHeight, forKey: "height");
-                  d.updateValue(
-                      Int(a.creationDate?.timeIntervalSince1970 ?? Date().timeIntervalSince1970),
-                      forKey: "time")
-                  arr.append(d);
-              }
-          }
-          if(type == 2 || type == 3){
-              let all =  PHAsset.fetchAssets(with: .video, options: nil);
-              for index in 0..<all.count{
-                  let a = all[index];
-                  var d:Dictionary<String,Any> = Dictionary<String,Any>();
-                  d.updateValue(a.localIdentifier, forKey: "id")
-                  d.updateValue("video/",forKey: "mimeType");
-                  d.updateValue(a.pixelWidth,forKey: "width");
-                  d.updateValue(a.pixelHeight, forKey: "height");
-                  d.updateValue(
-                      Int(a.creationDate?.timeIntervalSince1970 ?? Date().timeIntervalSince1970),
-                      forKey: "time")
-                  arr.append(d);
-              }
-          }
-          result(arr);
+        DispatchQueue.main.async {
+            var arr = Array<Dictionary<String,Any>>();
+            if(type == 1 || type == 3){
+                let all =  PHAsset.fetchAssets(with: .image, options: nil);
+                for index in 0..<all.count{
+                    let a = all[index];
+                    var d:Dictionary<String,Any> = Dictionary<String,Any>();
+                    d.updateValue(a.localIdentifier, forKey: "id")
+                    d.updateValue("image/",forKey: "mimeType");
+                    d.updateValue(a.pixelWidth,forKey: "width");
+                    d.updateValue(a.pixelHeight, forKey: "height");
+                    d.updateValue(
+                        Int(a.creationDate?.timeIntervalSince1970 ?? Date().timeIntervalSince1970),
+                        forKey: "time")
+                    arr.append(d);
+                }
+            }
+            if(type == 2 || type == 3){
+                let all =  PHAsset.fetchAssets(with: .video, options: nil);
+                for index in 0..<all.count{
+                    let a = all[index];
+                    var d:Dictionary<String,Any> = Dictionary<String,Any>();
+                    d.updateValue(a.localIdentifier, forKey: "id")
+                    d.updateValue("video/",forKey: "mimeType");
+                    d.updateValue(a.pixelWidth,forKey: "width");
+                    d.updateValue(a.pixelHeight, forKey: "height");
+                    d.updateValue(
+                        Int(a.creationDate?.timeIntervalSince1970 ?? Date().timeIntervalSince1970),
+                        forKey: "time")
+                    arr.append(d);
+                }
+            }
+            result(arr);
+        }
       }
 
       private func getFilePath(id:String,isImage:Bool,result:@escaping FlutterResult){
