@@ -3,12 +3,12 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'image_picker_flutter'
-  s.version          = '1.0.3+2'
+  s.version          = '1.0.3+3'
   s.summary          = 'A new Flutter plugin.'
   s.description      = <<-DESC
 A new Flutter plugin.
                        DESC
-  s.homepage         = 'https://github.com/taijuan/ImagePickerFlutter.git'
+  s.homepage         = 'https://github.com/taijuan/image_picker_flutter.git'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'taijuan' => '673636090@qq.com' }
   s.source           = { :path => '.' }
