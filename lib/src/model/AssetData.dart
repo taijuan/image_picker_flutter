@@ -2,20 +2,14 @@ class AssetData {
   String id;
   String name;
   String path;
-  int size;
   String mimeType;
-  int width;
-  int height;
   int time;
 
   AssetData.fromJson(dynamic json) {
     id = json["id"];
     name = json["name"];
     path = json["path"];
-    size = json["size"];
     mimeType = json["mimeType"];
-    width = json["width"];
-    height = json["height"];
     time = json["time"];
   }
 
@@ -24,10 +18,7 @@ class AssetData {
       "id": id,
       "name": name,
       "path": path,
-      "size": size,
       "mimeType": mimeType,
-      "width": width,
-      "height": height,
       "time": time,
     };
   }

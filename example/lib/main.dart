@@ -17,10 +17,16 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     if (Platform.isAndroid) {
-      PermissionHandler().requestPermissions([PermissionGroup.storage]);
+      PermissionHandler().requestPermissions([
+        PermissionGroup.storage,
+        PermissionGroup.camera,
+      ]);
     }
     if (Platform.isIOS) {
-      PermissionHandler().requestPermissions([PermissionGroup.photos]);
+      PermissionHandler().requestPermissions([
+        PermissionGroup.photos,
+        PermissionGroup.camera,
+      ]);
     }
     super.initState();
   }
@@ -59,11 +65,14 @@ class _MyAppState extends State<MyApp> {
       ),
       bottomNavigationBar: Container(
         color: Colors.grey,
-        height: 48 + MediaQuery.of(context).padding.bottom,
+        constraints: BoxConstraints(maxHeight: 90),
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         alignment: AlignmentDirectional.center,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: GridView.count(
+          crossAxisCount: 2,
+          childAspectRatio: 4,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           children: <Widget>[
             RawMaterialButton(
               onPressed: () {
@@ -92,6 +101,28 @@ class _MyAppState extends State<MyApp> {
               },
               fillColor: Colors.blue,
               child: Text("SingleImagePikcer"),
+            ),
+            RawMaterialButton(
+              onPressed: () {
+                ImagePicker.takePicture((a) {
+                  setState(() {
+                    _data.add(a);
+                  });
+                });
+              },
+              fillColor: Colors.blue,
+              child: Text("takePicture"),
+            ),
+            RawMaterialButton(
+              onPressed: () {
+                ImagePicker.takeVideo((a) {
+                  setState(() {
+                    _data.add(a);
+                  });
+                });
+              },
+              fillColor: Colors.blue,
+              child: Text("takeVideo"),
             ),
           ],
         ),

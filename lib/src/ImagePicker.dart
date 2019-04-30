@@ -4,11 +4,16 @@ import 'package:image_picker_flutter/src/model/AssetData.dart';
 import 'package:image_picker_flutter/src/page/MulImagePickerPage.dart';
 import 'package:image_picker_flutter/src/page/SingleImagePickerPage.dart';
 
+import 'utils/Utils.dart';
+
 typedef MulCallback = void Function(List<AssetData>);
 
 typedef SingleCallback = void Function(AssetData);
 
+typedef Callback = void Function(AssetData);
+
 class ImagePicker {
+  ///单选图片
   static void singlePicker(
     BuildContext context, {
     ImagePickerType type = ImagePickerType.imageAndVideo,
@@ -39,6 +44,7 @@ class ImagePicker {
       });
   }
 
+  ///多选图片
   static void mulPicker(
     BuildContext context, {
     List<AssetData> data,
@@ -73,6 +79,20 @@ class ImagePicker {
           mulCallback(data);
         }
       });
+  }
+
+  ///拍照返回图片路径
+  static void takePicture(Callback callback) {
+    Utils.takePicture().then((a) {
+      callback(a);
+    });
+  }
+
+  ///录像返回图片路径
+  static void takeVideo(Callback callback) {
+    Utils.takeVideo().then((a) {
+      callback(a);
+    });
   }
 }
 

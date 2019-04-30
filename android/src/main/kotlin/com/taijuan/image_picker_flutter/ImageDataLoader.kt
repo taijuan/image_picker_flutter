@@ -31,9 +31,6 @@ import java.util.concurrent.ScheduledExecutorService
 private val IMAGE_PROJECTION = arrayOf(//查询图片需要的数据列
         MediaStore.MediaColumns.DISPLAY_NAME, //图片的显示名称  aaa.jpg
         MediaStore.MediaColumns.DATA, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
-        MediaStore.MediaColumns.SIZE, //图片的大小，long型  132492
-        MediaStore.MediaColumns.WIDTH, //图片的宽度，int型  1920
-        MediaStore.MediaColumns.HEIGHT, //图片的高度，int型  1080
         MediaStore.MediaColumns.MIME_TYPE, //图片的类型     image/jpeg
         MediaStore.MediaColumns.DATE_ADDED)    //图片被添加的时间，long型  1450518608
 
@@ -48,7 +45,7 @@ internal fun Context.loadInBackground(selection: String, result: MethodChannel.R
     runBackground {
         var cursor: Cursor? = null
         try {
-            cursor = MediaStore.Images.Media.query(this.contentResolver, MediaStore.Files.getContentUri("external"), IMAGE_PROJECTION, selection, arrayOf(), IMAGE_PROJECTION[6] + " DESC")
+            cursor = MediaStore.Images.Media.query(this.contentResolver, MediaStore.Files.getContentUri("external"), IMAGE_PROJECTION, selection, arrayOf(), IMAGE_PROJECTION[3] + " DESC")
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[0]))
@@ -57,28 +54,22 @@ internal fun Context.loadInBackground(selection: String, result: MethodChannel.R
                     if (!imageFile.exists() || imageFile.length() <= 0) {
                         continue
                     }
-                    val size = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[2]))
-                    val width = cursor.getInt(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[3]))
-                    val height = cursor.getInt(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[4]))
-                    val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[5]))
-                    val time = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[6]))
+                    val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[2]))
+                    val time = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[3]))
                     val imageItem = HashMap<String, Any>().apply {
+                        put("id", path)
                         put("name", name)
                         put("path", path)
-                        put("size", size)
                         put("mimeType", mimeType)
-                        put("width", width)
-                        put("height", height)
                         put("time", time)
                     }
                     data.add(imageItem)
                 }
             }
         } catch (e: Exception) {
-            print(e)
         } finally {
             cursor?.close()
-           result.success(data)
+            result.success(data)
         }
     }
 }
@@ -100,7 +91,6 @@ internal fun loadInBackgroundToUInt8List(res: List<Any>, result: MethodChannel.R
                 result.success(retriever.frameAtTime.compress(width, height))
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             result.success(null)
         }
     }
@@ -125,7 +115,8 @@ private fun runBackground(body: () -> Unit) {
 
 }
 
-internal fun cancelBackground() {
+internal fun cancelBackground(result: MethodChannel.Result) {
     backgroundMap.filter { !it.future.isDone }.map { it.future.cancel(true) }
     backgroundMap.clear()
+    result.success(true)
 }

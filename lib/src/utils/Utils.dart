@@ -11,6 +11,7 @@ class Utils {
 
   static final MethodChannel channel = const MethodChannel('image_picker');
 
+  ///获取图片视频资源
   static Future<List<AssetData>> getImages(ImagePickerType type) async {
     final List<dynamic> a = await channel.invokeMethod(
       'getImages',
@@ -46,8 +47,21 @@ class Utils {
     return data;
   }
 
+  ///
   static void cancelAll() async {
     await channel.invokeMethod("cancelAll");
+  }
+
+  static Future<AssetData> takePicture() async {
+    dynamic a = await channel.invokeMethod("takePicture");
+    print(a);
+    return AssetData.fromJson(a);
+  }
+
+  static Future<AssetData> takeVideo() async {
+    dynamic a = await channel.invokeMethod("takeVideo");
+    print(a);
+    return AssetData.fromJson(a);
   }
 
   static final AssetImage placeholder = AssetImage(
