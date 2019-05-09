@@ -27,12 +27,12 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
   @override
   ImageStreamCompleter load(AssetDataImage key) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
-      scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Path: ${data.path}');
-      },
-    );
+        codec: _loadAsync(key),
+        scale: key.scale,
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+          yield DiagnosticsProperty<AssetDataImage>('Image key', this);
+        });
   }
 
   Future<ui.Codec> _loadAsync(AssetDataImage key) async {
@@ -47,7 +47,6 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
       ],
     );
     if (bytes == null || bytes.lengthInBytes == 0) return null;
-
     return await PaintingBinding.instance.instantiateImageCodec(bytes);
   }
 

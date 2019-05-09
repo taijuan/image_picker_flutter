@@ -13,6 +13,6 @@ fun Bitmap.compress(minWidth: Int, minHeight: Int): ByteArray {
     val destW = w / scale
     val destH = h / scale
     Bitmap.createScaledBitmap(this, destW, destH, true)
-            .compress(Bitmap.CompressFormat.JPEG, 75, bos)
+            .compress(Bitmap.CompressFormat.JPEG, 100, bos)
     return bos.toByteArray()
 }

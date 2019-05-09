@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.content.FileProvider
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
@@ -58,7 +59,10 @@ internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) 
                     put("mimeType", "image/jpg")
                     put("time", System.currentTimeMillis())
                 }
-                result.success(imageItem)
+
+                this.activity().runOnUiThread {
+                    result.success(imageItem)
+                }
             }
 
         }
@@ -102,7 +106,9 @@ internal fun PluginRegistry.Registrar.takeVideo(result: MethodChannel.Result) {
                     put("mimeType", "video/mp4")
                     put("time", System.currentTimeMillis())
                 }
-                result.success(imageItem)
+                this.activity().runOnUiThread {
+                    result.success(imageItem)
+                }
             }
         }
     }
@@ -136,4 +142,9 @@ internal class ResultListener : PluginRegistry.ActivityResultListener {
         return true
     }
 
+}
+
+
+internal fun Any.logcat() {
+    Log.e("image_picker", this.toString())
 }

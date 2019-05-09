@@ -7,9 +7,9 @@ import 'package:image_picker_flutter/src/ImagePicker.dart';
 import 'package:image_picker_flutter/src/model/AssetData.dart';
 
 class Utils {
-  static final String packageName = "image_picker_flutter";
+  static const String packageName = "image_picker_flutter";
 
-  static final MethodChannel channel = const MethodChannel('image_picker');
+  static const MethodChannel channel = const MethodChannel('image_picker');
 
   ///获取图片视频资源
   static Future<List<AssetData>> getImages(ImagePickerType type) async {
@@ -24,6 +24,13 @@ class Utils {
       },
     ).toList();
 
+    data.sort((a, b) {
+      return b.time.compareTo(a.time);
+    });
+    return data;
+  }
+
+  static Future<List<AssetData>> convertMulData(List<AssetData> data) async {
     if (Platform.isIOS) {
       List<dynamic> aa = await Future.wait(data.map((a) {
         return channel.invokeMethod("getFilePath", [a.id, a.isImage]);
@@ -36,14 +43,15 @@ class Utils {
         a.mimeType = "${a.mimeType}${path.split(".").last.toLowerCase()}";
         a.path = a.path.replaceAll("file:///", "");
       }
-    } else {
-      data.forEach((a) {
-        a.id = a.path;
-      });
     }
-    data.sort((a, b) {
-      return b.time.compareTo(a.time);
-    });
+    return data;
+  }
+
+  static Future<AssetData> convertSingleData(AssetData data) async {
+    if (Platform.isIOS) {
+      data.path =
+          await channel.invokeMethod("getFilePath", [data.id, data.isImage]);
+    }
     return data;
   }
 
@@ -95,5 +103,13 @@ class Utils {
         return 3;
     }
     return 3;
+  }
+
+  static int width2px(BuildContext context, {double ratio = 1}) {
+    int a = MediaQuery.of(context).size.width *
+        MediaQuery.of(context).devicePixelRatio ~/
+        ratio;
+    print(a);
+    return a;
   }
 }

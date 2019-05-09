@@ -52,7 +52,11 @@ class _MyAppState extends State<MyApp> {
             alignment: AlignmentDirectional.center,
             children: <Widget>[
               Image(
-                image: AssetDataImage(_data[index]),
+                image: AssetDataImage(
+                  _data[index],
+                  width: Utils.width2px(context, ratio: 3),
+                  height: Utils.width2px(context, ratio: 3),
+                ),
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,

@@ -16,7 +16,7 @@
 
 package com.taijuan.image_picker_flutter
 
-import android.content.Context
+import android.app.Activity
 import android.database.Cursor
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
@@ -38,10 +38,9 @@ internal const val IMAGE_SELECTION = "${MediaStore.Files.FileColumns.MEDIA_TYPE}
 internal const val VIDEO_SELECTION = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO} AND ${MediaStore.Files.FileColumns.SIZE}>0"
 
 
-private val data = arrayListOf<HashMap<String, Any>>()
-
-internal fun Context.loadInBackground(selection: String, result: MethodChannel.Result) {
-    data.clear()
+internal fun Activity.loadInBackground(selection: String, result: MethodChannel.Result) {
+    "start loadInBackground".logcat()
+    val data = arrayListOf<HashMap<String, Any>>()
     runBackground {
         var cursor: Cursor? = null
         try {
@@ -67,16 +66,20 @@ internal fun Context.loadInBackground(selection: String, result: MethodChannel.R
                 }
             }
         } catch (e: Exception) {
+            e.logcat()
         } finally {
             cursor?.close()
-            result.success(data)
+            "end loadInBackground".logcat()
+            runOnUiThread {
+                result.success(data)
+            }
         }
     }
 }
 
 
-internal fun loadInBackgroundToUInt8List(res: List<Any>, result: MethodChannel.Result) {
-    data.clear()
+internal fun Activity.loadInBackgroundToUInt8List(res: List<Any>, result: MethodChannel.Result) {
+//    data.clear()
     runBackground {
         try {
             val path = res[0] as String
@@ -84,14 +87,22 @@ internal fun loadInBackgroundToUInt8List(res: List<Any>, result: MethodChannel.R
             val width = res[2] as Int
             val height = res[3] as Int
             if (isImage) {
-                result.success(BitmapFactory.decodeFile(path).compress(width, height))
+                val bytes = BitmapFactory.decodeFile(path).compress(width, height)
+                runOnUiThread {
+                    result.success(bytes)
+                }
             } else {
                 val retriever = MediaMetadataRetriever()
                 retriever.setDataSource(path)
-                result.success(retriever.frameAtTime.compress(width, height))
+                val bytes = retriever.frameAtTime.compress(width, height)
+                runOnUiThread {
+                    result.success(bytes)
+                }
             }
         } catch (e: Exception) {
-            result.success(null)
+            runOnUiThread {
+                result.success(null)
+            }
         }
     }
 }

@@ -37,11 +37,9 @@ class MulImagePickerPage extends StatefulWidget {
 }
 
 class MulImagePickerPageState extends State<MulImagePickerPage> {
-  final List<AssetData> _data = [];
   final List<AssetData> selectedData = [];
-  final GlobalKey<RefreshIndicatorState> _refreshKey =
-      GlobalKey<RefreshIndicatorState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final List<AssetData> data = [];
 
   @override
   void dispose() {
@@ -54,21 +52,21 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
     if (widget.selectedData != null) {
       selectedData.addAll(widget.selectedData);
     }
-    Future.delayed(Duration()).whenComplete(() {
-      _refreshKey.currentState.show();
-    });
+    getData();
     super.initState();
   }
 
-  Future<Null> _getData() async {
-    final List<AssetData> data = await Utils.getImages(widget.type);
-    if (mounted) {
-      setState(() {
-        _data
-          ..clear()
-          ..addAll(data);
+  void getData() {
+    Utils.getImages(widget.type)
+      ..then((data) {
+        this.data.clear();
+        this.data.addAll(data);
+      })
+      ..whenComplete(() {
+        if (mounted) {
+          setState(() {});
+        }
       });
-    }
   }
 
   @override
@@ -92,32 +90,38 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
               Utils.save,
               color: Colors.white,
             ),
-        onSaveCallback: () {
-          Navigator.of(context).pop(selectedData);
+        onSaveCallback: () async {
+          Navigator.of(context).pop(await Utils.convertMulData(selectedData));
         },
         decoration: widget.decoration,
         appBarColor: widget.appBarColor,
       ),
-      body: RefreshIndicator(
-        key: _refreshKey,
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemBuilder: (context, index) => _createItem(_data[index]),
-          itemCount: _data.length,
-          padding: EdgeInsets.fromLTRB(
-            8,
-            8,
-            8,
-            8 + MediaQuery.of(context).padding.bottom,
-          ),
-        ),
-        onRefresh: _getData,
-      ),
+      body: body(),
     );
+  }
+
+  Widget body() {
+    if (data.isEmpty) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemBuilder: (context, index) => _createItem(data[index]),
+        itemCount: data.length,
+        padding: EdgeInsets.fromLTRB(
+          8,
+          8,
+          8,
+          8 + MediaQuery.of(context).padding.bottom,
+        ),
+      );
+    }
   }
 
   Widget _createItem(AssetData data) {
@@ -126,7 +130,11 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
       children: <Widget>[
         FadeInImage(
           placeholder: widget.placeholder ?? Utils.placeholder,
-          image: AssetDataImage(data),
+          image: AssetDataImage(
+            data,
+            width: Utils.width2px(context, ratio: 3),
+            height: Utils.width2px(context, ratio: 3),
+          ),
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,

@@ -6,7 +6,6 @@ import 'package:image_picker_flutter/src/model/AssetData.dart';
 import 'package:image_picker_flutter/src/page/ui/ImagePickerAppBar.dart';
 import 'package:image_picker_flutter/src/utils/Utils.dart';
 
-
 class SingleImagePickerPage extends StatefulWidget {
   final ImagePickerType type;
   final Widget title, back;
@@ -33,9 +32,7 @@ class SingleImagePickerPage extends StatefulWidget {
 }
 
 class SingleImagePickerPageState extends State<SingleImagePickerPage> {
-  final List<AssetData> _data = [];
-  final GlobalKey<RefreshIndicatorState> _refreshKey =
-      GlobalKey<RefreshIndicatorState>();
+  final List<AssetData> data = [];
 
   @override
   void dispose() {
@@ -45,20 +42,21 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
 
   @override
   void initState() {
-    Future.delayed(Duration()).whenComplete(() {
-      _refreshKey.currentState.show();
-    });
+    getData();
     super.initState();
   }
 
-  Future<Null> _getData() async {
-    final List<AssetData> data = await Utils.getImages(widget.type);
-    _data.clear();
-    if (mounted) {
-      setState(() {
-        _data.addAll(data);
+  void getData() {
+    Utils.getImages(widget.type)
+      ..then((data) {
+        this.data.clear();
+        this.data.addAll(data);
+      })
+      ..whenComplete(() {
+        if (mounted) {
+          setState(() {});
+        }
       });
-    }
   }
 
   @override
@@ -79,26 +77,32 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
         decoration: widget.decoration,
         appBarColor: widget.appBarColor,
       ),
-      body: RefreshIndicator(
-        key: _refreshKey,
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemBuilder: (context, index) => _createItem(_data[index]),
-          itemCount: _data.length,
-          padding: EdgeInsets.fromLTRB(
-            8,
-            8,
-            8,
-            8 + MediaQuery.of(context).padding.bottom,
-          ),
-        ),
-        onRefresh: _getData,
-      ),
+      body: body(),
     );
+  }
+
+  Widget body() {
+    if (data.isEmpty) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+        ),
+        itemBuilder: (context, index) => _createItem(data[index]),
+        itemCount: data.length,
+        padding: EdgeInsets.fromLTRB(
+          8,
+          8,
+          8,
+          8 + MediaQuery.of(context).padding.bottom,
+        ),
+      );
+    }
   }
 
   Widget _createItem(AssetData data) {
@@ -107,15 +111,19 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
       children: <Widget>[
         FadeInImage(
           placeholder: widget.placeholder ?? Utils.placeholder,
-          image: AssetDataImage(data),
+          image: AssetDataImage(
+            data,
+            width: Utils.width2px(context, ratio: 3),
+            height: Utils.width2px(context, ratio: 3),
+          ),
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
         ),
         iconVideo(data),
         InkWell(
-          onTap: () {
-            Navigator.of(context).pop(data);
+          onTap: () async {
+            Navigator.of(context).pop(await Utils.convertSingleData(data));
           },
         )
       ],
