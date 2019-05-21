@@ -62,14 +62,14 @@ class Utils {
 
   static Future<AssetData> takePicture() async {
     dynamic a = await channel.invokeMethod("takePicture");
-    print(a);
-    return AssetData.fromJson(a);
+    AssetData b = await convertSingleData(AssetData.fromJson(a));
+    return b;
   }
 
   static Future<AssetData> takeVideo() async {
     dynamic a = await channel.invokeMethod("takeVideo");
-    print(a);
-    return AssetData.fromJson(a);
+    AssetData b = await convertSingleData(AssetData.fromJson(a));
+    return b;
   }
 
   static final AssetImage placeholder = AssetImage(
