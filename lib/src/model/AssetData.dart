@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class AssetData {
   String id;
   String name;
@@ -28,7 +30,7 @@ class AssetData {
   @override
   bool operator ==(Object other) {
     if (other is AssetData && runtimeType == other.runtimeType) {
-      if (id != null) {
+      if (Platform.isIOS) {
         return id == other.id;
       } else {
         return path == other.path;

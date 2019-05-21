@@ -69,7 +69,7 @@ class _MyAppState extends State<MyApp> {
       ),
       bottomNavigationBar: Container(
         color: Colors.grey,
-        constraints: BoxConstraints(maxHeight: 90),
+        constraints: BoxConstraints(maxHeight: 200),
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         alignment: AlignmentDirectional.center,
         child: GridView.count(

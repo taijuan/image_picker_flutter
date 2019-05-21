@@ -42,6 +42,10 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>使用图片</string>
+	<string>使用图片</string>
+	<key>NSCameraUsageDescription</key>
+	<string>照相</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>录音</string>
 </dict>
 </plist>

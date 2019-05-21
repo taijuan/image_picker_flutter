@@ -1,3 +1,4 @@
+
 import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
 
@@ -54,7 +55,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final AssetDataImage typedOther = other;
-    return data.path == typedOther.data.path && scale == typedOther.scale;
+    return data == typedOther.data && scale == typedOther.scale;
   }
 
   @override
