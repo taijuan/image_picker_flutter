@@ -8,6 +8,8 @@ import 'package:image_picker_flutter/src/image_picker.dart';
 import 'package:image_picker_flutter/src/model/asset_data.dart';
 
 class Utils {
+  Utils._();
+
   ///插件包名，这个很重要
   static const String packageName = "image_picker_flutter";
 

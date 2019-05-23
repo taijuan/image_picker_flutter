@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker_flutter/src/model/asset_data.dart';
 import 'package:image_picker_flutter/src/page/mul_image_picker_page.dart';
 import 'package:image_picker_flutter/src/page/single_image_picker_page.dart';
-
 import 'package:image_picker_flutter/src/utils.dart';
 
 typedef MulCallback = void Function(List<AssetData>);
@@ -13,6 +12,8 @@ typedef SingleCallback = void Function(AssetData);
 typedef Callback = void Function(AssetData);
 
 class ImagePicker {
+  ImagePicker._();
+
   static debug(bool isDebug) {
     Utils.isDebug = isDebug;
   }
