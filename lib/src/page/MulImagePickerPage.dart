@@ -40,6 +40,7 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
   final List<AssetData> selectedData = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<AssetData> data = [];
+  bool isFirst = true;
 
   @override
   void dispose() {
@@ -52,8 +53,18 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
     if (widget.selectedData != null) {
       selectedData.addAll(widget.selectedData);
     }
-    getData();
+    Utils.log("initState");
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (isFirst) {
+      isFirst = false;
+      getData();
+    }
+    Utils.log("didChangeDependencies");
+    super.didChangeDependencies();
   }
 
   void getData() {
@@ -65,6 +76,7 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
       ..whenComplete(() {
         if (mounted) {
           setState(() {});
+          Utils.log("whenComplete");
         }
       });
   }

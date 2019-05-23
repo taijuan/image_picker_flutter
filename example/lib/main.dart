@@ -28,6 +28,9 @@ class _MyAppState extends State<MyApp> {
         PermissionGroup.camera,
       ]);
     }
+    PaintingBinding.instance.imageCache
+      ..maximumSize = 1000
+      ..maximumSizeBytes = 1000 << 20;
     super.initState();
   }
 

@@ -13,6 +13,10 @@ typedef SingleCallback = void Function(AssetData);
 typedef Callback = void Function(AssetData);
 
 class ImagePicker {
+  static debug(bool isDebug) {
+    Utils.isDebug = isDebug;
+  }
+
   ///单选图片
   static void singlePicker(
     BuildContext context, {
@@ -102,6 +106,7 @@ enum ImagePickerType {
   imageAndVideo,
 }
 
+///文字基类
 class Language {
   String get title => "Gallery";
 

@@ -1,6 +1,6 @@
-
+import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -38,29 +38,55 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
 
   Future<ui.Codec> _loadAsync(AssetDataImage key) async {
     assert(key == this);
-    Uint8List bytes = await Utils.channel.invokeMethod(
-      'toUInt8List',
-      [
-        data.id,
-        data.isImage,
-        width,
-        height,
-      ],
-    );
+    Uint8List bytes;
+    if (Platform.isIOS) {
+      ///ios根据id查找文件绝对路径
+      await Utils.convertSingleData(data);
+    }
+    File file = File(data.path);
+
+    ///判断文件是否存在
+    if (!await file.exists()) {
+      return null;
+    }
+
+    ///判断是否是支持的文件格式
+    if (Utils.isSupportImageFormatString(await file.openRead(0, 1).first)) {
+      ///支持
+      bytes = await file.readAsBytes();
+    } else {
+      ///不支持走原生方式，获取的是jpg
+      bytes = await Utils.channel.invokeMethod(
+        'toUInt8List',
+        [
+          data.id,
+          data.isImage,
+          width,
+          height,
+        ],
+      );
+    }
     if (bytes == null || bytes.lengthInBytes == 0) return null;
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
+    return await ui.instantiateImageCodec(
+      bytes,
+      targetWidth: width,
+    );
   }
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final AssetDataImage typedOther = other;
-    return data == typedOther.data && scale == typedOther.scale;
+    return data == typedOther.data &&
+        scale == typedOther.scale &&
+        width == typedOther.width &&
+        height == typedOther.height;
   }
 
   @override
-  int get hashCode => hashValues(data.path, scale);
+  int get hashCode => hashValues(data, width, height, scale);
 
   @override
-  String toString() => '$runtimeType("${data.path}", scale: $scale)';
+  String toString() =>
+      '$runtimeType("$data", width: $width,heght: $height,scale: $scale)';
 }

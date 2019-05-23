@@ -33,7 +33,7 @@ class SingleImagePickerPage extends StatefulWidget {
 
 class SingleImagePickerPageState extends State<SingleImagePickerPage> {
   final List<AssetData> data = [];
-
+  bool isFirst = true;
   @override
   void dispose() {
     Utils.cancelAll();
@@ -46,6 +46,14 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    if(isFirst){
+      isFirst = false;
+      getData();
+    }
+    super.didChangeDependencies();
+  }
   void getData() {
     Utils.getImages(widget.type)
       ..then((data) {
