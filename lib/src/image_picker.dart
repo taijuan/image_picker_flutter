@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/model/AssetData.dart';
-import 'package:image_picker_flutter/src/page/MulImagePickerPage.dart';
-import 'package:image_picker_flutter/src/page/SingleImagePickerPage.dart';
+import 'package:image_picker_flutter/src/model/asset_data.dart';
+import 'package:image_picker_flutter/src/page/mul_image_picker_page.dart';
+import 'package:image_picker_flutter/src/page/single_image_picker_page.dart';
 
-import 'utils/Utils.dart';
+import 'package:image_picker_flutter/src/utils.dart';
 
 typedef MulCallback = void Function(List<AssetData>);
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/ImagePicker.dart';
+import 'package:image_picker_flutter/src/image_picker.dart';
 
 typedef OnBackCallback = Function();
 typedef OnSaveCallback = Function();

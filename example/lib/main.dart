@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    ImagePicker.debug(true);
     if (Platform.isAndroid) {
       PermissionHandler().requestPermissions([
         PermissionGroup.storage,
@@ -30,7 +31,7 @@ class _MyAppState extends State<MyApp> {
     }
     PaintingBinding.instance.imageCache
       ..maximumSize = 1000
-      ..maximumSizeBytes = 1000 << 20;
+      ..maximumSizeBytes = 500 << 20;
     super.initState();
   }
 

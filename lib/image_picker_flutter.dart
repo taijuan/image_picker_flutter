@@ -1,9 +1,9 @@
 library image_picker_flutter;
 
-export 'src/ImagePicker.dart';
-export 'src/image/AssetDataImage.dart';
-export 'src/model/AssetData.dart';
-export 'src/page/MulImagePickerPage.dart';
-export 'src/page/SingleImagePickerPage.dart';
-export 'src/page/ui/ImagePickerAppBar.dart';
-export 'src/utils/Utils.dart';
+export 'src/image/asset_data_image.dart';
+export 'src/image_picker.dart';
+export 'src/model/asset_data.dart';
+export 'src/page/mul_image_picker_page.dart';
+export 'src/page/single_image_picker_page.dart';
+export 'src/page/ui/image_picker_app_bar.dart';
+export 'package:image_picker_flutter/src/utils.dart';

@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/ImagePicker.dart';
-import 'package:image_picker_flutter/src/model/AssetData.dart';
+import 'package:image_picker_flutter/src/image_picker.dart';
+import 'package:image_picker_flutter/src/model/asset_data.dart';
 
 class Utils {
   ///插件包名，这个很重要
@@ -133,7 +133,9 @@ class Utils {
   ///图片文件直接使用判断，目前支持jpg,png,webp,gif
   static bool isSupportImageFormatString(Uint8List bytes) {
     String format = imageFormatString(bytes);
+    log("===================================");
     log(format);
+    log('${bytes[0].toRadixString(16)} ${bytes[1].toRadixString(16)} ${bytes[2].toRadixString(16)}');
     return format != "unknow";
   }
 
@@ -158,6 +160,8 @@ class Utils {
 
   ///日志输出
   static log(dynamic o) {
-    print(o);
+    if (isDebug) {
+      print(o);
+    }
   }
 }

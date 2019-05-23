@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/ImagePicker.dart';
-import 'package:image_picker_flutter/src/image/AssetDataImage.dart';
-import 'package:image_picker_flutter/src/model/AssetData.dart';
-import 'package:image_picker_flutter/src/page/ui/ImagePickerAppBar.dart';
-import 'package:image_picker_flutter/src/utils/Utils.dart';
+import 'package:image_picker_flutter/src/image_picker.dart';
+import 'package:image_picker_flutter/src/image/asset_data_image.dart';
+import 'package:image_picker_flutter/src/model/asset_data.dart';
+import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
+import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
+import 'package:image_picker_flutter/src/utils.dart';
 
 class MulImagePickerPage extends StatefulWidget {
   final int limit;
@@ -102,8 +103,9 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
               Utils.save,
               color: Colors.white,
             ),
-        onSaveCallback: () async {
-          Navigator.of(context).pop(await Utils.convertMulData(selectedData));
+        onSaveCallback: () {
+          LoadingDialog.showLoadingDialog(context);
+          Navigator.of(context)..pop()..pop(selectedData);
         },
         decoration: widget.decoration,
         appBarColor: widget.appBarColor,

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/ImagePicker.dart';
-import 'package:image_picker_flutter/src/image/AssetDataImage.dart';
-import 'package:image_picker_flutter/src/model/AssetData.dart';
-import 'package:image_picker_flutter/src/page/ui/ImagePickerAppBar.dart';
-import 'package:image_picker_flutter/src/utils/Utils.dart';
+import 'package:image_picker_flutter/src/image_picker.dart';
+import 'package:image_picker_flutter/src/image/asset_data_image.dart';
+import 'package:image_picker_flutter/src/model/asset_data.dart';
+import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
+import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
+import 'package:image_picker_flutter/src/utils.dart';
 
 class SingleImagePickerPage extends StatefulWidget {
   final ImagePickerType type;
@@ -34,6 +35,7 @@ class SingleImagePickerPage extends StatefulWidget {
 class SingleImagePickerPageState extends State<SingleImagePickerPage> {
   final List<AssetData> data = [];
   bool isFirst = true;
+
   @override
   void dispose() {
     Utils.cancelAll();
@@ -48,12 +50,13 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
 
   @override
   void didChangeDependencies() {
-    if(isFirst){
+    if (isFirst) {
       isFirst = false;
       getData();
     }
     super.didChangeDependencies();
   }
+
   void getData() {
     Utils.getImages(widget.type)
       ..then((data) {
@@ -131,6 +134,7 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
         iconVideo(data),
         InkWell(
           onTap: () async {
+            LoadingDialog.showLoadingDialog(context);
             Navigator.of(context).pop(await Utils.convertSingleData(data));
           },
         )

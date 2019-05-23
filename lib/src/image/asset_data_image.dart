@@ -4,8 +4,8 @@ import 'dart:ui' as ui show instantiateImageCodec, Codec;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/model/AssetData.dart';
-import 'package:image_picker_flutter/src/utils/Utils.dart';
+import 'package:image_picker_flutter/src/model/asset_data.dart';
+import 'package:image_picker_flutter/src/utils.dart';
 
 class AssetDataImage extends ImageProvider<AssetDataImage> {
   const AssetDataImage(
@@ -51,7 +51,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     }
 
     ///判断是否是支持的文件格式
-    if (Utils.isSupportImageFormatString(await file.openRead(0, 1).first)) {
+    if (Utils.isSupportImageFormatString(await file.openRead(0, 3).first)) {
       ///支持
       bytes = await file.readAsBytes();
     } else {
