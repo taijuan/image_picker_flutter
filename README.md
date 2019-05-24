@@ -11,7 +11,7 @@ First, add `image_picker_flutter` as a [dependency in your pubspec.yaml file]
 ``` aidl
 
 dependencies:
-  image_picker_flutter: ^1.0.4+2
+  image_picker_flutter: ^1.0.5+1
   
 ```
 
