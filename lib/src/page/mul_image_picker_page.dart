@@ -105,7 +105,10 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
             ),
         onSaveCallback: () {
           LoadingDialog.showLoadingDialog(context);
-          Navigator.of(context)..pop()..pop(selectedData);
+          Utils.convertMulData(selectedData)
+            ..whenComplete(() {
+              Navigator.of(context)..pop()..pop(selectedData);
+            });
         },
         decoration: widget.decoration,
         appBarColor: widget.appBarColor,

@@ -41,15 +41,13 @@ class Utils {
   ///多选数据组合
   static Future<List<AssetData>> convertMulData(List<AssetData> data) async {
     if (Platform.isIOS) {
-      List<dynamic> aa = await Future.wait(data.map((a) {
-        return channel.invokeMethod("getFilePath", [a.id, a.isImage]);
-      }));
       for (var i = 0; i < data.length; i++) {
         AssetData a = data[i];
-        String path = aa[i] ?? "";
-        a.path = path;
-        a.name = path.split("/").last;
-        a.mimeType = "${a.mimeType}${path.split(".").last.toLowerCase()}";
+        if (isEmpty(a.path)) {
+          await convertSingleData(a);
+        }
+        a.name = a.path.split("/").last;
+        a.mimeType = "${a.mimeType}${a.path.split(".").last.toLowerCase()}";
         a.path = a.path.replaceAll("file:///", "");
       }
     }
@@ -61,6 +59,7 @@ class Utils {
     if (Platform.isIOS) {
       data.path =
           await channel.invokeMethod("getFilePath", [data.id, data.isImage]);
+      data.path = data.path.replaceAll("file:///", "");
     }
     return data;
   }
@@ -165,5 +164,9 @@ class Utils {
     if (isDebug) {
       print(o);
     }
+  }
+
+  static bool isEmpty(String s) {
+    return s == null || s.isEmpty;
   }
 }

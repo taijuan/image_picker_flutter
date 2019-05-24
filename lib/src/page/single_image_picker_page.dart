@@ -133,9 +133,12 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
         ),
         iconVideo(data),
         InkWell(
-          onTap: () async {
+          onTap: () {
             LoadingDialog.showLoadingDialog(context);
-            Navigator.of(context).pop(await Utils.convertSingleData(data));
+            Utils.convertSingleData(data)
+              ..whenComplete(() {
+                Navigator.of(context)..pop()..pop(data);
+              });
           },
         )
       ],
