@@ -32,7 +32,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
         scale: key.scale,
         informationCollector: () sync* {
           yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-          yield DiagnosticsProperty<AssetDataImage>('Image key', this);
+          yield DiagnosticsProperty<AssetDataImage>('Image key', key);
         });
   }
 
@@ -73,6 +73,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     return await ui.instantiateImageCodec(
       bytes,
       targetWidth: width,
+      targetHeight: -1,
     );
   }
 
