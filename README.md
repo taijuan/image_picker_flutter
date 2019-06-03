@@ -4,6 +4,9 @@
 
 A Flutter plugin for iOS and Android for picking images from the image library.
 
+ <img src="screenshot/1.jpg" alt="screenshot1" width ="30%"/> <img src="screenshot/2.jpg" alt="screenshot2" width ="30%"/>
+
+
 ## Installation
 
 First, add `image_picker_flutter` as a [dependency in your pubspec.yaml file]
@@ -11,7 +14,7 @@ First, add `image_picker_flutter` as a [dependency in your pubspec.yaml file]
 ``` aidl
 
 dependencies:
-  image_picker_flutter: ^1.0.4+2
+  image_picker_flutter: ^1.0.5+1
   
 ```
 
