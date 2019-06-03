@@ -6,4 +6,4 @@ export 'src/model/asset_data.dart';
 export 'src/page/mul_image_picker_page.dart';
 export 'src/page/single_image_picker_page.dart';
 export 'src/page/ui/image_picker_app_bar.dart';
-export 'package:image_picker_flutter/src/utils.dart';
+export 'src/utils.dart';

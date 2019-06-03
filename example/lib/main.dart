@@ -1,10 +1,22 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker_flutter/image_picker_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void main() => runApp(MaterialApp(home: MyApp()));
+void main() async {
+  const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    statusBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+  );
+  SystemChrome.setSystemUIOverlayStyle(dark);
+  runApp(MaterialApp(home: MyApp()));
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -73,7 +85,8 @@ class _MyAppState extends State<MyApp> {
       ),
       bottomNavigationBar: Container(
         color: Colors.grey,
-        constraints: BoxConstraints(maxHeight: 200),
+        height: MediaQuery.of(context).size.width / 4 +
+            MediaQuery.of(context).padding.bottom,
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         alignment: AlignmentDirectional.center,
         child: GridView.count(

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/image_picker.dart';
 import 'package:image_picker_flutter/src/image/asset_data_image.dart';
+import 'package:image_picker_flutter/src/image_picker.dart';
 import 'package:image_picker_flutter/src/model/asset_data.dart';
-import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
+import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/utils.dart';
 
 class MulImagePickerPage extends StatefulWidget {
@@ -55,17 +56,8 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
       selectedData.addAll(widget.selectedData);
     }
     Utils.log("initState");
+    SchedulerBinding.instance.addPostFrameCallback((d) => getData());
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    if (isFirst) {
-      isFirst = false;
-      getData();
-    }
-    Utils.log("didChangeDependencies");
-    super.didChangeDependencies();
   }
 
   void getData() {

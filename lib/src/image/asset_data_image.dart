@@ -10,8 +10,8 @@ import 'package:image_picker_flutter/src/utils.dart';
 class AssetDataImage extends ImageProvider<AssetDataImage> {
   const AssetDataImage(
     this.data, {
-    this.width = 360,
-    this.height = 360,
+    this.width,
+    this.height,
     this.scale = 1.0,
   })  : assert(data != null),
         assert(scale != null);
@@ -54,10 +54,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     }
 
     ///判断是否是支持的文件格式
-    if (Utils.isSupportImageFormatString(await file.openRead(0, 3).first)) {
-      ///支持
-      bytes = await file.readAsBytes();
-    } else {
+    if (!Utils.isSupportImageFormatString(await file.openRead(0, 3).first)) {
       ///不支持走原生方式，获取的是jpg
       bytes = await Utils.channel.invokeMethod(
         'toUInt8List',
@@ -68,13 +65,44 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
           height,
         ],
       );
+      return await ui.instantiateImageCodec(bytes);
     }
+    bytes = await file.readAsBytes();
     if (bytes == null || bytes.lengthInBytes == 0) return null;
-    return await ui.instantiateImageCodec(
-      bytes,
-      targetWidth: width,
-      targetHeight: -1,
-    );
+    if (width == null && height == null) {
+      return await ui.instantiateImageCodec(bytes);
+    } else if (width <= 0 && height == null) {
+      return await ui.instantiateImageCodec(bytes);
+    } else if (width > 0 && height == null) {
+      return await ui.instantiateImageCodec(bytes, targetWidth: width);
+    } else if (width == null && height <= 0) {
+      return await ui.instantiateImageCodec(bytes);
+    } else if (width == null && height > 0) {
+      return await ui.instantiateImageCodec(bytes, targetHeight: height);
+    } else {
+//      ui.Codec codec = await ui.instantiateImageCodec(bytes);
+//      var a = await codec.getNextFrame();
+//      int w = a.image.width;
+//      int h = a.image.height;
+//      double wd = w / width.toDouble();
+//      double hd = h / height.toDouble();
+//      double be = 1;
+//      if (wd >= 1 && hd >= 1) {
+//        be = wd >= hd ? wd : hd;
+//      }
+//      codec = await ui.instantiateImageCodec(
+//        bytes,
+//        targetWidth: w ~/ be,
+//        targetHeight: h ~/ be,
+//      );
+//      return codec;
+      ///正常代码应该如上注释，但是太慢了
+      return await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: width > height ? width : -1,
+        targetHeight: width <= height ? height : -1,
+      );
+    }
   }
 
   @override

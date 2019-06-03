@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_picker_flutter/src/image_picker.dart';
 import 'package:image_picker_flutter/src/image/asset_data_image.dart';
+import 'package:image_picker_flutter/src/image_picker.dart';
 import 'package:image_picker_flutter/src/model/asset_data.dart';
-import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
+import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/utils.dart';
 
 class SingleImagePickerPage extends StatefulWidget {
@@ -44,17 +45,8 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
 
   @override
   void initState() {
-    getData();
+    SchedulerBinding.instance.addPostFrameCallback((d) => getData());
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    if (isFirst) {
-      isFirst = false;
-      getData();
-    }
-    super.didChangeDependencies();
   }
 
   void getData() {
@@ -131,26 +123,25 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
           width: double.infinity,
           height: double.infinity,
         ),
-        iconVideo(data),
-        InkWell(
-          onTap: () {
+        RawMaterialButton(
+          constraints: BoxConstraints.expand(),
+          onPressed: () {
             LoadingDialog.showLoadingDialog(context);
             Utils.convertSingleData(data)
               ..whenComplete(() {
                 Navigator.of(context)..pop()..pop(data);
               });
           },
-        )
+          shape: CircleBorder(),
+        ),
+        iconVideo(data),
       ],
     );
   }
 
   Widget iconVideo(AssetData data) {
     if (data.isImage) {
-      return Container(
-        width: 0,
-        height: 0,
-      );
+      return SizedBox.shrink();
     }
     return Icon(
       Utils.video,
