@@ -132,8 +132,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                             d.updateValue(
                                 Int(a!.creationDate!.timeIntervalSince1970),
                                 forKey: "time");
-                            d.updateValue(a.pixelWidth,forKey: "width");
-                            d.updateValue(a.pixelHeight, forKey: "height");
+                            d.updateValue(a!.pixelWidth,forKey: "width");
+                            d.updateValue(a!.pixelHeight, forKey: "height");
                             self.result?(d);
                             self.result = nil;
                         }
@@ -158,8 +158,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                             d.updateValue(
                                 Int(a!.creationDate!.timeIntervalSince1970),
                                 forKey: "time")
-                            d.updateValue(a.pixelWidth,forKey: "width");
-                            d.updateValue(a.pixelHeight, forKey: "height");
+                            d.updateValue(a!.pixelWidth,forKey: "width");
+                            d.updateValue(a!.pixelHeight, forKey: "height");
                             self.result?(d);
                             self.result = nil;
                         }
