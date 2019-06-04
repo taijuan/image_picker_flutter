@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'image_picker_flutter'
-  s.version          = '1.2.2'
+  s.version          = '1.2.2+1'
   s.summary          = 'A new Flutter plugin.'
   s.description      = <<-DESC
 A new Flutter plugin.
