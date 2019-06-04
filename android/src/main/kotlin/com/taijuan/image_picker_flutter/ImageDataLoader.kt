@@ -32,7 +32,9 @@ private val IMAGE_PROJECTION = arrayOf(//查询图片需要的数据列
         MediaStore.MediaColumns.DISPLAY_NAME, //图片的显示名称  aaa.jpg
         MediaStore.MediaColumns.DATA, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
         MediaStore.MediaColumns.MIME_TYPE, //图片的类型     image/jpeg
-        MediaStore.MediaColumns.DATE_ADDED)    //图片被添加的时间，long型  1450518608
+        MediaStore.MediaColumns.DATE_ADDED,
+        MediaStore.MediaColumns.WIDTH,
+        MediaStore.MediaColumns.HEIGHT)    //图片被添加的时间，long型  1450518608
 
 internal const val IMAGE_SELECTION = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE} AND ${MediaStore.Files.FileColumns.SIZE}>0"
 internal const val VIDEO_SELECTION = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO} AND ${MediaStore.Files.FileColumns.SIZE}>0"
@@ -44,23 +46,36 @@ internal fun Activity.loadInBackground(selection: String, result: MethodChannel.
     runBackground {
         var cursor: Cursor? = null
         try {
-            cursor = MediaStore.Images.Media.query(this.contentResolver, MediaStore.Files.getContentUri("external"), IMAGE_PROJECTION, selection, arrayOf(), IMAGE_PROJECTION[3] + " DESC")
+            cursor = MediaStore.Images.Media.query(this.contentResolver,
+                    MediaStore.Files.getContentUri("external"),
+                    arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, //图片的显示名称  aaa.jpg
+                            MediaStore.MediaColumns.DATA, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
+                            MediaStore.MediaColumns.MIME_TYPE, //图片的类型     image/jpeg
+                            MediaStore.MediaColumns.DATE_ADDED,
+                            MediaStore.MediaColumns.WIDTH,
+                            MediaStore.MediaColumns.HEIGHT),
+                    selection, arrayOf(),
+                    IMAGE_PROJECTION[3] + " DESC")
             if (cursor != null) {
                 while (cursor.moveToNext()) {
-                    val name = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[0]))
-                    val path = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[1]))
+                    val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
+                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
                     val imageFile = File(path)
                     if (!imageFile.exists() || imageFile.length() <= 0) {
                         continue
                     }
-                    val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[2]))
-                    val time = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGE_PROJECTION[3]))
+                    val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))
+                    val time = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED))
+                    val width = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.WIDTH))
+                    val height = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.HEIGHT))
                     val imageItem = HashMap<String, Any>().apply {
                         put("id", path)
                         put("name", name)
                         put("path", path)
                         put("mimeType", mimeType)
                         put("time", time)
+                        put("width", width)
+                        put("height", height)
                     }
                     data.add(imageItem)
                 }

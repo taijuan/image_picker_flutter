@@ -141,8 +141,8 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
           placeholder: widget.placeholder ?? Utils.placeholder,
           image: AssetDataImage(
             data,
-            width: Utils.width2px(context, ratio: 3),
-            height: Utils.width2px(context, ratio: 3),
+            targetWidth: Utils.width2px(context, ratio: 3),
+            targetHeight: Utils.width2px(context, ratio: 3),
           ),
           fit: BoxFit.cover,
           width: double.infinity,

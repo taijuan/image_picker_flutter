@@ -73,6 +73,7 @@ class Utils {
   static Future<AssetData> takePicture() async {
     dynamic a = await channel.invokeMethod("takePicture");
     AssetData b = await convertSingleData(AssetData.fromJson(a));
+    log(b);
     return b;
   }
 
@@ -80,6 +81,7 @@ class Utils {
   static Future<AssetData> takeVideo() async {
     dynamic a = await channel.invokeMethod("takeVideo");
     AssetData b = await convertSingleData(AssetData.fromJson(a));
+    log(b);
     return b;
   }
 

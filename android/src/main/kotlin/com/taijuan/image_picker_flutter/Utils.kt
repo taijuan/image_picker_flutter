@@ -2,6 +2,8 @@ package com.taijuan.image_picker_flutter
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -58,6 +60,10 @@ internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) 
                     put("path", path)
                     put("mimeType", "image/jpg")
                     put("time", System.currentTimeMillis())
+                    val arr = size(path)
+                    Log.e("zuiweng",arr.toString())
+                    put("width", arr[0])
+                    put("height", arr[1])
                 }
 
                 this.activity().runOnUiThread {
@@ -105,6 +111,9 @@ internal fun PluginRegistry.Registrar.takeVideo(result: MethodChannel.Result) {
                     put("path", path)
                     put("mimeType", "video/mp4")
                     put("time", System.currentTimeMillis())
+                    val arr = size(path, isImage = false)
+                    put("width", arr[0])
+                    put("height", arr[1])
                 }
                 this.activity().runOnUiThread {
                     result.success(imageItem)
@@ -144,6 +153,17 @@ internal class ResultListener : PluginRegistry.ActivityResultListener {
 
 }
 
+internal fun size(path: String, isImage: Boolean = true): Array<Int> {
+    return if (isImage) {
+        val bitmap = BitmapFactory.decodeFile(path)
+        arrayOf(bitmap.width, bitmap.height)
+    } else {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(path)
+        val bitmap = retriever.frameAtTime
+        arrayOf(bitmap.width, bitmap.height)
+    }
+}
 
 internal fun Any.logcat() {
     Log.e("image_picker", this.toString())

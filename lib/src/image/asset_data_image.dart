@@ -10,14 +10,14 @@ import 'package:image_picker_flutter/src/utils.dart';
 class AssetDataImage extends ImageProvider<AssetDataImage> {
   const AssetDataImage(
     this.data, {
-    this.width,
-    this.height,
+    this.targetWidth,
+    this.targetHeight,
     this.scale = 1.0,
   })  : assert(data != null),
         assert(scale != null);
 
   final AssetData data;
-  final int width, height;
+  final int targetWidth, targetHeight;
   final double scale;
 
   @override
@@ -62,46 +62,48 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
         [
           data.id,
           data.isImage,
-          width,
-          height,
+          targetWidth,
+          targetHeight,
         ],
       );
       return await ui.instantiateImageCodec(bytes);
     }
     bytes = await file.readAsBytes();
     if (bytes == null || bytes.lengthInBytes == 0) return null;
-    if (width == null && height == null) {
+    if (targetWidth == null && targetHeight == null) {
       return await ui.instantiateImageCodec(bytes);
-    } else if (width <= 0 && height == null) {
+    } else if (targetWidth <= 0 && targetHeight == null) {
       return await ui.instantiateImageCodec(bytes);
-    } else if (width > 0 && height == null) {
-      return await ui.instantiateImageCodec(bytes, targetWidth: width);
-    } else if (width == null && height <= 0) {
-      return await ui.instantiateImageCodec(bytes);
-    } else if (width == null && height > 0) {
-      return await ui.instantiateImageCodec(bytes, targetHeight: height);
-    } else {
-//      ui.Codec codec = await ui.instantiateImageCodec(bytes);
-//      var a = await codec.getNextFrame();
-//      int w = a.image.width;
-//      int h = a.image.height;
-//      double wd = w / width.toDouble();
-//      double hd = h / height.toDouble();
-//      double be = 1;
-//      if (wd >= 1 && hd >= 1) {
-//        be = wd >= hd ? wd : hd;
-//      }
-//      codec = await ui.instantiateImageCodec(
-//        bytes,
-//        targetWidth: w ~/ be,
-//        targetHeight: h ~/ be,
-//      );
-//      return codec;
-      ///正常代码应该如上注释，但是太慢了
+    } else if (targetWidth > 0 && targetHeight == null) {
       return await ui.instantiateImageCodec(
         bytes,
-        targetWidth: width > height ? width : -1,
-        targetHeight: width <= height ? height : -1,
+        targetWidth: targetWidth > data.width ? targetWidth : -1,
+      );
+    } else if (targetWidth == null && targetHeight <= 0) {
+      return await ui.instantiateImageCodec(bytes);
+    } else if (targetWidth == null && targetHeight > 0) {
+      return await ui.instantiateImageCodec(
+        bytes,
+        targetHeight: targetHeight > data.height ? targetHeight : -1,
+      );
+    } else {
+      int w = data.width;
+      int h = data.height;
+      double wd = w / targetWidth.toDouble();
+      double hd = h / targetHeight.toDouble();
+      double be = 1;
+      if (wd >= 1 && hd >= 1) {
+        be = wd >= hd ? wd : hd;
+      }
+      w = w ~/ be;
+      h = h ~/ be;
+      Utils.log("width：${data.width},height：${data.height}");
+      Utils.log("targetWidth：$targetWidth,targetHeight：$targetHeight");
+      Utils.log("w：$w,h：$h");
+      return await ui.instantiateImageCodec(
+        bytes,
+        targetWidth: w,
+        targetHeight: h,
       );
     }
   }
@@ -112,14 +114,14 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     final AssetDataImage typedOther = other;
     return data == typedOther.data &&
         scale == typedOther.scale &&
-        width == typedOther.width &&
-        height == typedOther.height;
+        targetWidth == typedOther.targetWidth &&
+        targetHeight == typedOther.targetHeight;
   }
 
   @override
-  int get hashCode => hashValues(data, width, height, scale);
+  int get hashCode => hashValues(data, targetWidth, targetHeight, scale);
 
   @override
   String toString() =>
-      '$runtimeType("$data", width: $width,heght: $height,scale: $scale)';
+      '$runtimeType("$data", targetWidth: $targetWidth,targetHeight: $targetHeight,scale: $scale)';
 }

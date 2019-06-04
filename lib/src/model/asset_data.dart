@@ -6,6 +6,8 @@ class AssetData {
   String path;
   String mimeType;
   int time;
+  int width;
+  int height;
 
   AssetData.fromJson(dynamic json) {
     id = json["id"];
@@ -13,6 +15,8 @@ class AssetData {
     path = json["path"];
     mimeType = json["mimeType"];
     time = json["time"];
+    width = json["width"];
+    height = json["height"];
   }
 
   Map<String, dynamic> toJson() {
@@ -22,6 +26,8 @@ class AssetData {
       "path": path,
       "mimeType": mimeType,
       "time": time,
+      "width": width,
+      "height": height,
     };
   }
 

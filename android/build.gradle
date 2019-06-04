@@ -40,6 +40,6 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.core:core:1.2.1-alpha01'
+    implementation 'androidx.core:core:1.2.0-alpha01'
     implementation "androidx.exifinterface:exifinterface:1.1.0-alpha01"
 }
