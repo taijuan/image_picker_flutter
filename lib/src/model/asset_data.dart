@@ -42,7 +42,7 @@ class AssetData {
 
   @override
   int get hashCode {
-    if (id != null) {
+    if (Platform.isIOS) {
       return id.hashCode;
     } else {
       return path.hashCode;

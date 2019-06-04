@@ -28,12 +28,13 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
   @override
   ImageStreamCompleter load(AssetDataImage key) {
     return MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key),
-        scale: key.scale,
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-          yield DiagnosticsProperty<AssetDataImage>('Image key', key);
-        });
+      codec: _loadAsync(key),
+      scale: key.scale,
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+        yield DiagnosticsProperty<AssetDataImage>('Image key', key);
+      },
+    );
   }
 
   Future<ui.Codec> _loadAsync(AssetDataImage key) async {
