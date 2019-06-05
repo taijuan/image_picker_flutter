@@ -23,7 +23,7 @@ class Utils {
   static Future<List<AssetData>> getImages(ImagePickerType type) async {
     final List<dynamic> a = await channel.invokeMethod(
       'getImages',
-      Utils.getType(type),
+      getType(type),
     );
     final List<AssetData> data = a.map(
       (a) {
@@ -127,9 +127,8 @@ class Utils {
 
   ///屏幕宽度(单位pix)
   static int width2px(BuildContext context, {double ratio = 1}) {
-    int a = MediaQuery.of(context).size.width *
-        MediaQuery.of(context).devicePixelRatio ~/
-        ratio;
+    var m = MediaQuery.of(context);
+    int a = m.size.width * m.devicePixelRatio ~/ ratio;
     return a;
   }
 

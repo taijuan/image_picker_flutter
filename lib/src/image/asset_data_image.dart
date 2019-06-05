@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 
@@ -91,10 +92,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
       int h = data.height;
       double wd = w / targetWidth.toDouble();
       double hd = h / targetHeight.toDouble();
-      double be = 1;
-      if (wd >= 1 && hd >= 1) {
-        be = wd >= hd ? wd : hd;
-      }
+      double be = max(1, max(wd, hd));
       w = w ~/ be;
       h = h ~/ be;
       Utils.log("width：${data.width},height：${data.height}");

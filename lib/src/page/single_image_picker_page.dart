@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker_flutter/src/image/asset_data_image.dart';
 import 'package:image_picker_flutter/src/image_picker.dart';
@@ -45,7 +44,7 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
 
   @override
   void initState() {
-    SchedulerBinding.instance.addPostFrameCallback((d) => getData());
+    WidgetsBinding.instance.addPostFrameCallback((d) => getData());
     super.initState();
   }
 
