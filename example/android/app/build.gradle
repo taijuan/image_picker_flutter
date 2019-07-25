@@ -40,9 +40,9 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.taijuan.image_picker_flutter_example"
         minSdkVersion 16
-        targetSdkVersion 28
-        versionCode 122
-        versionName "1.2.2+1"
+        targetSdkVersion 29
+        versionCode 130
+        versionName "1.3.0"
     }
 
     buildTypes {
