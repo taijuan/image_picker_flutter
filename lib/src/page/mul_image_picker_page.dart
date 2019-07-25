@@ -16,7 +16,7 @@ class MulImagePickerPage extends StatefulWidget {
   final Color appBarColor;
   final Language language;
   final ImageProvider placeholder;
-
+  final Widget emptyView;
   const MulImagePickerPage({
     Key key,
     this.title,
@@ -29,6 +29,7 @@ class MulImagePickerPage extends StatefulWidget {
     this.appBarColor = Colors.blue,
     this.language,
     this.placeholder,
+    this.emptyView,
   }) : super(key: key);
 
   @override
@@ -64,6 +65,7 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
       ..then((data) {
         this.data.clear();
         this.data.addAll(data);
+        this.isFirst = false;
       })
       ..whenComplete(() {
         if (mounted) {
@@ -109,10 +111,12 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
   }
 
   Widget body() {
-    if (data.isEmpty) {
+    if (isFirst) {
       return Center(
         child: CircularProgressIndicator(),
       );
+    } else if (data.isEmpty) {
+      return Center(child: widget.emptyView??Text(widget.language.empty));
     } else {
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

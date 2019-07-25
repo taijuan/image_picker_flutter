@@ -14,6 +14,7 @@ class SingleImagePickerPage extends StatefulWidget {
   final Language language;
   final ImageProvider placeholder;
   final Color appBarColor;
+  final Widget emptyView;
 
   const SingleImagePickerPage({
     Key key,
@@ -24,6 +25,7 @@ class SingleImagePickerPage extends StatefulWidget {
     this.language,
     this.placeholder,
     this.appBarColor = Colors.blue,
+    this.emptyView,
   }) : super(key: key);
 
   @override
@@ -53,6 +55,7 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
       ..then((data) {
         this.data.clear();
         this.data.addAll(data);
+        this.isFirst = false;
       })
       ..whenComplete(() {
         if (mounted) {
@@ -84,11 +87,13 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
   }
 
   Widget body() {
-    if (data.isEmpty) {
+    if (isFirst) {
       return Center(
         child: CircularProgressIndicator(),
       );
-    } else {
+    } else if(data.isEmpty){
+      return Center(child: widget.emptyView??Text(widget.language.empty));
+    }else {
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,

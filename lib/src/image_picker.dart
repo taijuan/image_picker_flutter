@@ -28,19 +28,21 @@ class ImagePicker {
     Widget back,
     Decoration decoration,
     Color appBarColor = Colors.blue,
+    Widget emptyView,
     SingleCallback singleCallback,
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SingleImagePickerPage(
-              type: type,
-              language: language ?? Language(),
-              placeholder: placeholder,
-              decoration: decoration,
-              appBarColor: appBarColor ?? Colors.blue,
-              title: title,
-              back: back,
-            ),
+          type: type,
+          language: language ?? Language(),
+          placeholder: placeholder,
+          decoration: decoration,
+          appBarColor: appBarColor ?? Colors.blue,
+          title: title,
+          back: back,
+          emptyView: emptyView,
+        ),
       ),
     )..then((data) {
         if (data != null && singleCallback != null) {
@@ -62,22 +64,24 @@ class ImagePicker {
     Widget menu,
     Decoration decoration,
     Color appBarColor = Colors.blue,
+    Widget emptyView,
     MulCallback mulCallback,
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MulImagePickerPage(
-              selectedData: data,
-              type: type,
-              limit: limit,
-              appBarColor: appBarColor ?? Colors.blue,
-              language: language ?? Language(),
-              placeholder: placeholder,
-              decoration: decoration,
-              title: title,
-              menu: menu,
-              back: back,
-            ),
+          selectedData: data,
+          type: type,
+          limit: limit,
+          appBarColor: appBarColor ?? Colors.blue,
+          language: language ?? Language(),
+          placeholder: placeholder,
+          decoration: decoration,
+          title: title,
+          menu: menu,
+          back: back,
+          emptyView: emptyView,
+        ),
       ),
     )..then((data) {
         if (data != null && mulCallback != null) {
@@ -112,4 +116,6 @@ class Language {
   String get title => "Gallery";
 
   String get showToast => "Only ### images can be selected";
+
+  String get empty => "Empty";
 }
