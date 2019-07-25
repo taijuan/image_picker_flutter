@@ -91,9 +91,9 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
       return Center(
         child: CircularProgressIndicator(),
       );
-    } else if(data.isEmpty){
-      return Center(child: widget.emptyView??Text(widget.language.empty));
-    }else {
+    } else if (data.isEmpty) {
+      return Center(child: widget.emptyView ?? Text(widget.language.empty));
+    } else {
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,

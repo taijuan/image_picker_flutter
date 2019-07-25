@@ -116,7 +116,7 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
         child: CircularProgressIndicator(),
       );
     } else if (data.isEmpty) {
-      return Center(child: widget.emptyView??Text(widget.language.empty));
+      return Center(child: widget.emptyView ?? Text(widget.language.empty));
     } else {
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
