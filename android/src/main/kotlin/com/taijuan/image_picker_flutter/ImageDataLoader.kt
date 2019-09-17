@@ -46,7 +46,7 @@ internal fun Activity.loadInBackground(selection: String, result: MethodChannel.
     runBackground {
         var cursor: Cursor? = null
         try {
-            cursor = MediaStore.Images.Media.query(this.contentResolver,
+            cursor = this.contentResolver.query(
                     MediaStore.Files.getContentUri("external"),
                     arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, //图片的显示名称  aaa.jpg
                             MediaStore.MediaColumns.DATA, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg

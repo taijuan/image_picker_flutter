@@ -34,7 +34,7 @@ internal fun existSDCard(): Boolean {
  */
 internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) {
     var takeImageFile = if (existSDCard()) {
-        File(Environment.getExternalStorageDirectory(), "/DCIM/camera/")
+        File(context().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "/DCIM/camera/")
     } else {
         Environment.getDataDirectory()
     }
@@ -61,7 +61,7 @@ internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) 
                     put("mimeType", "image/jpg")
                     put("time", System.currentTimeMillis())
                     val arr = size(path)
-                    Log.e("zuiweng",arr.toString())
+                    Log.e("zuiweng", arr.toString())
                     put("width", arr[0])
                     put("height", arr[1])
                 }
@@ -85,7 +85,7 @@ internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) 
  */
 internal fun PluginRegistry.Registrar.takeVideo(result: MethodChannel.Result) {
     var takeImageFile = if (existSDCard()) {
-        File(Environment.getExternalStorageDirectory(), "/DCIM/camera/")
+        File(context().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "/DCIM/camera/")
     } else {
         Environment.getDataDirectory()
     }
