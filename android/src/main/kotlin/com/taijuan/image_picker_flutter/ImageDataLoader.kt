@@ -17,9 +17,11 @@
 package com.taijuan.image_picker_flutter
 
 import android.app.Activity
+import android.content.ContentUris
 import android.database.Cursor
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.provider.MediaStore
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
@@ -48,8 +50,8 @@ internal fun Activity.loadInBackground(selection: String, result: MethodChannel.
         try {
             cursor = this.contentResolver.query(
                     MediaStore.Files.getContentUri("external"),
-                    arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, //图片的显示名称  aaa.jpg
-                            MediaStore.MediaColumns.DATA, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
+                    arrayOf(MediaStore.Files.FileColumns._ID,
+                            MediaStore.MediaColumns.DISPLAY_NAME, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
                             MediaStore.MediaColumns.MIME_TYPE, //图片的类型     image/jpeg
                             MediaStore.MediaColumns.DATE_ADDED,
                             MediaStore.MediaColumns.WIDTH,
@@ -59,7 +61,8 @@ internal fun Activity.loadInBackground(selection: String, result: MethodChannel.
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
-                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))
+                    val path = PathUtils.getPath(this,cursor.getUri())
+                    path.logcat()
                     val imageFile = File(path)
                     if (!imageFile.exists() || imageFile.length() <= 0) {
                         continue
@@ -145,4 +148,15 @@ internal fun cancelBackground(result: MethodChannel.Result) {
     backgroundMap.filter { !it.future.isDone }.map { it.future.cancel(true) }
     backgroundMap.clear()
     result.success(true)
+}
+
+private fun Cursor.getUri(): Uri {
+    val id = this.getLong(this.getColumnIndex(MediaStore.Files.FileColumns._ID))
+    val mimeType = this.getString(this.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
+    val contentUri = when {
+        mimeType.contains("image") -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        mimeType.contains("video") -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        else -> MediaStore.Files.getContentUri("external")
+    }
+    return ContentUris.withAppendedId(contentUri, id)
 }
