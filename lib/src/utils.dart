@@ -59,6 +59,8 @@ class Utils {
     if (Platform.isIOS) {
       data.path =
           await channel.invokeMethod("getFilePath", [data.id, data.isImage]);
+      print("data.id = " + data.id);
+      print("data.path = " + data.path);
       data.path = data.path.replaceAll("file:///", "");
     }
     return data;

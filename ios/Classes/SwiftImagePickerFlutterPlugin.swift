@@ -5,7 +5,7 @@ import Photos
 import MobileCoreServices
 
 public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigationControllerDelegate,UIImagePickerControllerDelegate{
-    let manager:PHCachingImageManager = PHCachingImageManager.init();
+    let manager:PHCachingImageManager = PHCachingImageManager.default() as! PHCachingImageManager;
     var result: FlutterResult? = nil;
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "image_picker", binaryMessenger: registrar.messenger());
@@ -76,10 +76,11 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 withLocalIdentifiers: [id],
                 options: nil
                 ).firstObject!;
-            manager.requestImageData(for: asset, options: nil, resultHandler:{(data,str,x,any) in
-                let url = (any?["PHImageFileURLKey"] as? NSURL)?.absoluteString
-                result(url);
-            });
+            let options2 = PHContentEditingInputRequestOptions()
+            options2.isNetworkAccessAllowed = true
+            asset.requestContentEditingInput(with: options2){(input, info) in
+                result(input?.fullSizeImageURL?.path ?? "")
+            }
         }else{
             let  asset:PHAsset = PHAsset.fetchAssets(
                 withLocalIdentifiers: [id],
@@ -87,7 +88,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 ).firstObject!;
             manager.requestAVAsset(forVideo: asset, options: nil, resultHandler: {(asset,v,any) in
                 let  url = (asset as? AVURLAsset)?.url.absoluteString
-                result(url);
+                result(url ?? "");
             });
         }
     }
@@ -194,7 +195,5 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         }else{
             print("camera is nil");
         }
-        
     }
-    
 }
