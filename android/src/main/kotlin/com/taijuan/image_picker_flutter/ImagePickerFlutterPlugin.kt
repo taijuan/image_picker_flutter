@@ -24,16 +24,17 @@ class ImagePickerFlutterPlugin : MethodCallHandler {
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        when {
-            call.method == "getImages" -> registrar.activity().loadInBackground(when (call.arguments as Int) {
+        when (call.method) {
+            "getFolders" -> registrar.activity().getFolders(when (call.arguments as Int) {
                 1 -> IMAGE_SELECTION
                 2 -> VIDEO_SELECTION
                 else -> "$IMAGE_SELECTION or $VIDEO_SELECTION"
             }, result)
-            call.method == "toUInt8List" -> registrar.activity().loadInBackgroundToUInt8List(call.arguments as List<Any>, result)
-            call.method == "cancelAll" -> cancelBackground(result)
-            call.method == "takePicture" -> registrar.takePicture(result)
-            call.method == "takeVideo" -> registrar.takeVideo(result)
+            "getImages" -> registrar.activity().getImages(call.arguments as String, result)
+            "toUInt8List" -> registrar.activity().toUInt8List(call.arguments as List<Any>, result)
+            "cancelAll" -> cancelBackground(result)
+            "takePicture" -> registrar.takePicture(result)
+            "takeVideo" -> registrar.takeVideo(result)
             else -> result.notImplemented()
         }
     }

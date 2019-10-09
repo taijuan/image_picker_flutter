@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2011 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.taijuan.image_picker_flutter
 
 import android.app.Activity
@@ -31,8 +15,8 @@ import java.util.concurrent.ScheduledExecutorService
 
 
 private val IMAGE_PROJECTION = arrayOf(//查询图片需要的数据列
-        MediaStore.MediaColumns.DISPLAY_NAME, //图片的显示名称  aaa.jpg
-        MediaStore.MediaColumns.DATA, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
+        MediaStore.Files.FileColumns._ID,
+        MediaStore.MediaColumns.DISPLAY_NAME, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
         MediaStore.MediaColumns.MIME_TYPE, //图片的类型     image/jpeg
         MediaStore.MediaColumns.DATE_ADDED,
         MediaStore.MediaColumns.WIDTH,
@@ -41,31 +25,28 @@ private val IMAGE_PROJECTION = arrayOf(//查询图片需要的数据列
 internal const val IMAGE_SELECTION = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE} AND ${MediaStore.Files.FileColumns.SIZE}>0"
 internal const val VIDEO_SELECTION = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO} AND ${MediaStore.Files.FileColumns.SIZE}>0"
 
-
-internal fun Activity.loadInBackground(selection: String, result: MethodChannel.Result) {
-    "start loadInBackground".logcat()
-    val data = arrayListOf<HashMap<String, Any>>()
+internal val allImages = arrayListOf<HashMap<String, Any>>()
+internal val allFolders = arrayListOf<String>()
+internal fun Activity.getFolders(selection: String, result: MethodChannel.Result) {
+    allImages.clear()
+    allFolders.clear()
+    allFolders.add("/all")
     runBackground {
         var cursor: Cursor? = null
         try {
-            cursor = this.contentResolver.query(
-                    MediaStore.Files.getContentUri("external"),
-                    arrayOf(MediaStore.Files.FileColumns._ID,
-                            MediaStore.MediaColumns.DISPLAY_NAME, //图片的真实路径  /storage/emulated/0/pp/downloader/wallpaper/aaa.jpg
-                            MediaStore.MediaColumns.MIME_TYPE, //图片的类型     image/jpeg
-                            MediaStore.MediaColumns.DATE_ADDED,
-                            MediaStore.MediaColumns.WIDTH,
-                            MediaStore.MediaColumns.HEIGHT),
-                    selection, arrayOf(),
-                    IMAGE_PROJECTION[3] + " DESC")
+            cursor = this.contentResolver.query(MediaStore.Files.getContentUri("external"), IMAGE_PROJECTION, selection, arrayOf(), IMAGE_PROJECTION[3] + " DESC")
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
-                    val path = PathUtils.getPath(this,cursor.getUri())
+                    val path = PathUtils.getPath(this, cursor.getUri())
                     path.logcat()
                     val imageFile = File(path)
                     if (!imageFile.exists() || imageFile.length() <= 0) {
                         continue
+                    }
+                    val folder = imageFile.parentFile?.absolutePath ?: "/all"
+                    if (!allFolders.contains(folder)) {
+                        allFolders.add(folder)
                     }
                     val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))
                     val time = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED))
@@ -75,28 +56,46 @@ internal fun Activity.loadInBackground(selection: String, result: MethodChannel.
                         put("id", path)
                         put("name", name)
                         put("path", path)
+                        put("folder", folder)
                         put("mimeType", mimeType)
                         put("time", time)
                         put("width", width)
                         put("height", height)
                     }
-                    data.add(imageItem)
+                    allImages.add(imageItem)
                 }
             }
         } catch (e: Exception) {
             e.logcat()
         } finally {
             cursor?.close()
-            "end loadInBackground".logcat()
             runOnUiThread {
-                result.success(data)
+                allFolders.logcat()
+                result.success(allFolders)
             }
         }
     }
 }
 
+internal fun Activity.getImages(folder: String, result: MethodChannel.Result) {
+    if (folder == "/all") {
+        runOnUiThread {
+            result.success(allImages)
+        }
+    } else {
+        val images = arrayListOf<HashMap<String, Any>>()
+        allImages.forEach {
+            if (it["folder"] == folder) {
+                images.add(it)
+            }
+        }
+        runOnUiThread {
+            result.success(images)
+        }
+    }
+}
 
-internal fun Activity.loadInBackgroundToUInt8List(res: List<Any>, result: MethodChannel.Result) {
+internal fun Activity.toUInt8List(res: List<Any>, result: MethodChannel.Result) {
 //    data.clear()
     runBackground {
         try {

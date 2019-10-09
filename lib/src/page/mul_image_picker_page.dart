@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker_flutter/src/image/asset_data_image.dart';
 import 'package:image_picker_flutter/src/image_picker.dart';
 import 'package:image_picker_flutter/src/model/asset_data.dart';
+import 'package:image_picker_flutter/src/page/ui/DropHeader.dart';
 import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
 import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/utils.dart';
@@ -11,15 +12,15 @@ class MulImagePickerPage extends StatefulWidget {
   final int limit;
   final List<AssetData> selectedData;
   final ImagePickerType type;
-  final Widget title, back, menu;
+  final Widget  back, menu;
   final Decoration decoration;
   final Color appBarColor;
   final Language language;
   final ImageProvider placeholder;
   final Widget emptyView;
+
   const MulImagePickerPage({
     Key key,
-    this.title,
     this.limit = 9,
     this.selectedData,
     this.type = ImagePickerType.imageAndVideo,
@@ -56,12 +57,11 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
       selectedData.addAll(widget.selectedData);
     }
     Utils.log("initState");
-    WidgetsBinding.instance.addPostFrameCallback((d) => getData());
     super.initState();
   }
 
-  void getData() {
-    Utils.getImages(widget.type)
+  void getData(String folder) {
+    Utils.getImages(folder)
       ..then((data) {
         this.data.clear();
         this.data.addAll(data);
@@ -81,7 +81,12 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
       key: _scaffoldKey,
       appBar: ImagePickerAppBar(
         context: context,
-        title: widget.title,
+        center: DropHeader(
+          type: widget.type,
+          onSelect: (item) {
+            getData(item);
+          },
+        ),
         language: widget.language,
         back: widget.back ??
             Icon(

@@ -7,9 +7,11 @@ import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
 import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/utils.dart';
 
+import 'ui/DropHeader.dart';
+
 class SingleImagePickerPage extends StatefulWidget {
   final ImagePickerType type;
-  final Widget title, back;
+  final Widget back;
   final Decoration decoration;
   final Language language;
   final ImageProvider placeholder;
@@ -19,7 +21,6 @@ class SingleImagePickerPage extends StatefulWidget {
   const SingleImagePickerPage({
     Key key,
     this.type = ImagePickerType.imageAndVideo,
-    this.title,
     this.back,
     this.decoration,
     this.language,
@@ -44,14 +45,8 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((d) => getData());
-    super.initState();
-  }
-
-  void getData() {
-    Utils.getImages(widget.type)
+  void getData(String folder) {
+    Utils.getImages(folder)
       ..then((data) {
         this.data.clear();
         this.data.addAll(data);
@@ -60,6 +55,7 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
       ..whenComplete(() {
         if (mounted) {
           setState(() {});
+          Utils.log("whenComplete");
         }
       });
   }
@@ -69,7 +65,12 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
     return Scaffold(
       appBar: ImagePickerAppBar(
         context: context,
-        title: widget.title,
+        center: DropHeader(
+          type: widget.type,
+          onSelect: (item) {
+            getData(item);
+          },
+        ),
         language: widget.language,
         back: widget.back ??
             Icon(

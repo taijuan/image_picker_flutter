@@ -24,7 +24,6 @@ class ImagePicker {
     ImagePickerType type = ImagePickerType.imageAndVideo,
     Language language,
     ImageProvider placeholder,
-    Widget title,
     Widget back,
     Decoration decoration,
     Color appBarColor = Colors.blue,
@@ -39,7 +38,6 @@ class ImagePicker {
           placeholder: placeholder,
           decoration: decoration,
           appBarColor: appBarColor ?? Colors.blue,
-          title: title,
           back: back,
           emptyView: emptyView,
         ),
@@ -59,7 +57,6 @@ class ImagePicker {
     int limit = 9,
     Language language,
     ImageProvider placeholder,
-    Widget title,
     Widget back,
     Widget menu,
     Decoration decoration,
@@ -77,7 +74,6 @@ class ImagePicker {
           language: language ?? Language(),
           placeholder: placeholder,
           decoration: decoration,
-          title: title,
           menu: menu,
           back: back,
           emptyView: emptyView,
@@ -113,8 +109,6 @@ enum ImagePickerType {
 
 ///文字基类
 class Language {
-  String get title => "Gallery";
-
   String get showToast => "Only ### images can be selected";
 
   String get empty => "Empty";

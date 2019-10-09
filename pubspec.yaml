@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  provide: ^1.0.2
+
 flutter:
   plugin:
     androidPackage: com.taijuan.image_picker_flutter

@@ -7,7 +7,7 @@ typedef OnSaveCallback = Function();
 
 class ImagePickerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final BuildContext context;
-  final Widget title, back, menu;
+  final Widget center, back, menu;
   final OnBackCallback onBackCallback;
   final OnSaveCallback onSaveCallback;
   final Decoration decoration;
@@ -17,7 +17,7 @@ class ImagePickerAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ImagePickerAppBar({
     Key key,
     @required this.context,
-    @required this.title,
+    @required this.center,
     this.back,
     this.menu,
     this.onBackCallback,
@@ -40,16 +40,7 @@ class ImagePickerAppBar extends StatelessWidget implements PreferredSizeWidget {
       decoration: decoration ?? BoxDecoration(color: appBarColor),
       child: Stack(
         children: <Widget>[
-          Center(
-            child: title ??
-                Text(
-                  language.title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
-                ),
-          ),
+          center,
           Positioned(
             left: 0,
             top: 0,

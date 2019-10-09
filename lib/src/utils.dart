@@ -19,11 +19,23 @@ class Utils {
   ///日志开关
   static bool isDebug = false;
 
+  static Future<List<String>> getFolders(ImagePickerType type) async {
+    final List<dynamic> a = await channel.invokeMethod(
+      'getFolders',
+      getType(type),
+    );
+    List<String> folders = a.map((a) {
+      String folder = a;
+      return folder;
+    }).toList();
+    return folders;
+  }
+
   ///获取图片视频资源
-  static Future<List<AssetData>> getImages(ImagePickerType type) async {
+  static Future<List<AssetData>> getImages(String folder) async {
     final List<dynamic> a = await channel.invokeMethod(
       'getImages',
-      getType(type),
+      folder,
     );
     final List<AssetData> data = a.map(
       (a) {
