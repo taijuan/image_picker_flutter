@@ -30,7 +30,7 @@ internal val allFolders = arrayListOf<String>()
 internal fun Activity.getFolders(selection: String, result: MethodChannel.Result) {
     allImages.clear()
     allFolders.clear()
-    allFolders.add("/all")
+    allFolders.add("/All")
     runBackground {
         var cursor: Cursor? = null
         try {
@@ -44,7 +44,7 @@ internal fun Activity.getFolders(selection: String, result: MethodChannel.Result
                     if (!imageFile.exists() || imageFile.length() <= 0) {
                         continue
                     }
-                    val folder = imageFile.parentFile?.absolutePath ?: "/all"
+                    val folder = imageFile.parentFile?.absolutePath ?: "/All"
                     if (!allFolders.contains(folder)) {
                         allFolders.add(folder)
                     }
@@ -78,7 +78,7 @@ internal fun Activity.getFolders(selection: String, result: MethodChannel.Result
 }
 
 internal fun Activity.getImages(folder: String, result: MethodChannel.Result) {
-    if (folder == "/all") {
+    if (folder == "/All") {
         runOnUiThread {
             result.success(allImages)
         }
