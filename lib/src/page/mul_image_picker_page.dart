@@ -12,7 +12,7 @@ class MulImagePickerPage extends StatefulWidget {
   final int limit;
   final List<AssetData> selectedData;
   final ImagePickerType type;
-  final Widget  back, menu;
+  final Widget back, menu;
   final Decoration decoration;
   final Color appBarColor;
   final Language language;
@@ -103,10 +103,7 @@ class MulImagePickerPageState extends State<MulImagePickerPage> {
             ),
         onSaveCallback: () {
           LoadingDialog.showLoadingDialog(context);
-          Utils.convertMulData(selectedData)
-            ..whenComplete(() {
-              Navigator.of(context)..pop()..pop(selectedData);
-            });
+          Navigator.of(context)..pop()..pop(selectedData);
         },
         decoration: widget.decoration,
         appBarColor: widget.appBarColor,

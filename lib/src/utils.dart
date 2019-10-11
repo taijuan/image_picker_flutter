@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -50,34 +49,6 @@ class Utils {
     return data;
   }
 
-  ///多选数据组合
-  static Future<List<AssetData>> convertMulData(List<AssetData> data) async {
-    if (Platform.isIOS) {
-      for (var i = 0; i < data.length; i++) {
-        AssetData a = data[i];
-        if (isEmpty(a.path)) {
-          await convertSingleData(a);
-        }
-        a.name = a.path.split("/").last;
-        a.mimeType = "${a.mimeType}${a.path.split(".").last.toLowerCase()}";
-        a.path = a.path.replaceAll("file:///", "");
-      }
-    }
-    return data;
-  }
-
-  ///单选数据组合
-  static Future<AssetData> convertSingleData(AssetData data) async {
-    if (Platform.isIOS) {
-      data.path =
-          await channel.invokeMethod("getFilePath", [data.id, data.isImage]);
-      print("data.id = " + data.id);
-      print("data.path = " + data.path);
-      data.path = data.path.replaceAll("file:///", "");
-    }
-    return data;
-  }
-
   ///取消任务
   static void cancelAll() async {
     await channel.invokeMethod("cancelAll");
@@ -86,16 +57,16 @@ class Utils {
   ///拍照
   static Future<AssetData> takePicture() async {
     dynamic a = await channel.invokeMethod("takePicture");
-    AssetData b = await convertSingleData(AssetData.fromJson(a));
-    log(b);
+    AssetData b = AssetData.fromJson(a);
+    log(a);
     return b;
   }
 
   ///录制视频
   static Future<AssetData> takeVideo() async {
     dynamic a = await channel.invokeMethod("takeVideo");
-    AssetData b = await convertSingleData(AssetData.fromJson(a));
-    log(b);
+    AssetData b = AssetData.fromJson(a);
+    log(a);
     return b;
   }
 

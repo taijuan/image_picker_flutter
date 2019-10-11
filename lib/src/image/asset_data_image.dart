@@ -40,14 +40,8 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
 
   Future<ui.Codec> _loadAsync(AssetDataImage key) async {
     assert(key == this);
-    Utils.log("_loadAsync start");
+
     Uint8List bytes;
-    if (Platform.isIOS && Utils.isEmpty(data.path)) {
-      ///ios根据id查找文件绝对路径
-      await Utils.convertSingleData(data);
-      Utils.log("_loadAsync start ios path");
-      Utils.log("_loadAsync start ios path" + data.path);
-    }
     File file = File(data.path);
 
     ///判断文件是否存在
