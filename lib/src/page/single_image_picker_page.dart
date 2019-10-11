@@ -7,7 +7,7 @@ import 'package:image_picker_flutter/src/page/ui/dialog_loading.dart';
 import 'package:image_picker_flutter/src/page/ui/image_picker_app_bar.dart';
 import 'package:image_picker_flutter/src/utils.dart';
 
-import 'ui/DropHeader.dart';
+import 'ui/drop_header_popup.dart';
 
 class SingleImagePickerPage extends StatefulWidget {
   final ImagePickerType type;

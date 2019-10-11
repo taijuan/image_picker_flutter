@@ -17,7 +17,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if(call.method == "getFolders"){
-            getFolder(type: call.arguments as! Int, result: result)
+            getFolders(type: call.arguments as! Int, result: result)
         }else if(call.method == "getImages"){
             getImages(folder: call.arguments as! String,result: result);
         }else if(call.method == "toUInt8List"){
@@ -35,7 +35,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     }
     
     //MARK:获取对应相册数据源
-    private func getFolder(type:Int,result:@escaping FlutterResult){
+    private func getFolders(type:Int,result:@escaping FlutterResult){
         allImages.removeAll()
         allFolders.removeAll()
         allFolders.append("All")
