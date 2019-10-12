@@ -1,27 +1,34 @@
-# image_picker_flutter
+# image_picker_flutter [![pub package](https://img.shields.io/pub/v/image_picker_flutter.svg)](https://pub.dartlang.org/packages/image_picker_flutter)
+## 功能介绍
 
-[![pub package](https://img.shields.io/pub/v/image_picker_flutter.svg)](https://pub.dartlang.org/packages/image_picker_flutter)
+- [x] 该插件目前支持IOS(8-13)、Android(16-29)
+- [x] 支持单选、多选
+- [x] 提供拍照、视频录制功能
+- [x] 支持多种图片格式PNG、JPG、GIF等,Flutter不支持的图片格式通过IOS、Android原生方法提供支持
+- [x] 支持多种视频格式，视频预览图通过IOS、Android原生方法提供支持
+- [x] 所用资源都提供File的绝对路径
+- [ ] 不支持原图预览
+- [ ] 不支持视频播放
+- [ ] 不支持IOS、Android动态权限、需要使用之前自行权限获取，建议使用[permission_handler](https://github.com/BaseflowIT/flutter-permission-handler)
+- [ ] ...
 
-A Flutter plugin for iOS and Android for picking images from the image library.
+## Demo动图(有那么点不清晰)
+![image](https://github.com/taijuan/image_picker_flutter/blob/master/image.gif)
 
-![image](image.gif)
+## 使用说明
 
-## Installation
+### dependencies in flutter
 
-First, add `image_picker_flutter` as a [dependency in your pubspec.yaml file]
-
-``` aidl
+```
 
 dependencies:
   image_picker_flutter: ^1.3.3
   
 ```
 
-### iOS
+### iOS 权限
 
-Add the following keys to your Info.plist:
-
-``` IOS Keys
+``` 
 
 <key>NSPhotoLibraryUsageDescription</key>
 <string>使用图片</string>
@@ -31,9 +38,7 @@ Add the following keys to your Info.plist:
 <string>录音</string>
 
 ```
-### Android
-
-Add the following permission to your manifest:
+### Android 权限
 
 ``` Android Permissions
 
@@ -44,128 +49,24 @@ Add the following permission to your manifest:
 ```
  
 
-### Install app Android  
+## Demo 应用
 
-[apk download](https://fir.im/qfb8)
+### [Android APP](https://fir.im/qfb8)
+
+### IOS APP 因发布原因暂不提供、可以下载代码编译安装
 
 
 
-### API
 
-```
- import 'package:flutter/material.dart';
- import 'package:flutter/widgets.dart';
- import 'package:image_picker_flutter/src/model/asset_data.dart';
- import 'package:image_picker_flutter/src/page/mul_image_picker_page.dart';
- import 'package:image_picker_flutter/src/page/single_image_picker_page.dart';
- import 'package:image_picker_flutter/src/utils.dart';
- 
- typedef MulCallback = void Function(List<AssetData>);
- 
- typedef SingleCallback = void Function(AssetData);
- 
- typedef Callback = void Function(AssetData);
- 
- class ImagePicker {
-   ImagePicker._();
- 
-   static debug(bool isDebug) {
-     Utils.isDebug = isDebug;
-   }
- 
-   ///单选图片
-   static void singlePicker(
-     BuildContext context, {
-     ImagePickerType type = ImagePickerType.imageAndVideo,
-     Language language,
-     ImageProvider placeholder,
-     Widget title,
-     Widget back,
-     Decoration decoration,
-     Color appBarColor = Colors.blue,
-     SingleCallback singleCallback,
-   }) {
-     Navigator.of(context).push(
-       MaterialPageRoute(
-         builder: (context) => SingleImagePickerPage(
-               type: type,
-               language: language ?? Language(),
-               placeholder: placeholder,
-               decoration: decoration,
-               appBarColor: appBarColor ?? Colors.blue,
-               title: title,
-               back: back,
-             ),
-       ),
-     )..then((data) {
-         if (data != null && singleCallback != null) {
-           singleCallback(data);
-         }
-       });
-   }
- 
-   ///多选图片
-   static void mulPicker(
-     BuildContext context, {
-     List<AssetData> data,
-     ImagePickerType type = ImagePickerType.imageAndVideo,
-     int limit = 9,
-     Language language,
-     ImageProvider placeholder,
-     Widget title,
-     Widget back,
-     Widget menu,
-     Decoration decoration,
-     Color appBarColor = Colors.blue,
-     MulCallback mulCallback,
-   }) {
-     Navigator.of(context).push(
-       MaterialPageRoute(
-         builder: (context) => MulImagePickerPage(
-               selectedData: data,
-               type: type,
-               limit: limit,
-               appBarColor: appBarColor ?? Colors.blue,
-               language: language ?? Language(),
-               placeholder: placeholder,
-               decoration: decoration,
-               title: title,
-               menu: menu,
-               back: back,
-             ),
-       ),
-     )..then((data) {
-         if (data != null && mulCallback != null) {
-           mulCallback(data);
-         }
-       });
-   }
- 
-   ///拍照返回图片路径
-   static void takePicture(Callback callback) {
-     Utils.takePicture().then((a) {
-       callback(a);
-     });
-   }
- 
-   ///录像返回图片路径
-   static void takeVideo(Callback callback) {
-     Utils.takeVideo().then((a) {
-       callback(a);
-     });
-   }
- }
- 
- enum ImagePickerType {
-   onlyImage,
-   onlyVideo,
-   imageAndVideo,
- }
- 
- ///文字基类
- class Language {
-   String get title => "Gallery";
- 
-   String get showToast => "Only ### images can be selected";
- }
-```
+## API 介绍
+- [ImagePicker](https://github.com/taijuan/image_picker_flutter/blob/master/lib/src/image_picker.dart)
+  - （单选）singlePicker
+  - （多选）mulPicker
+  - （拍照）takePicture
+  - （视频录制）takeVideo
+
+
+## 序言
+    - Flutter越做越强大！！！
+    - image_picker_flutter功能越来越完善！！！
+    - 开源加油！！！
