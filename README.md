@@ -4,11 +4,7 @@
 
 A Flutter plugin for iOS and Android for picking images from the image library.
 
-<img src="image_1.jpg" width = "30%" div align=right />
-<img src="image_2.jpg" width = "30%" div align=right />
-<img src="image_3.jpg" width = "30%" div align=right />
-<img src="image_4.jpg" width = "45%" div align=right />
-<img src="image_5.jpg" width = "45%" div align=right />
+![image](image.gif)
 
 ## Installation
 
