@@ -41,8 +41,8 @@ android {
         applicationId "com.taijuan.image_picker_flutter_example"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 133
-        versionName "1.3.3"
+        versionCode 140
+        versionName "1.4.0"
     }
 
     buildTypes {

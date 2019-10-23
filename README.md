@@ -22,7 +22,7 @@
 ```
 
 dependencies:
-  image_picker_flutter: ^1.3.3
+  image_picker_flutter: ^1.4.0
   
 ```
 
