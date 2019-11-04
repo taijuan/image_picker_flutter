@@ -1,13 +1,12 @@
 package com.taijuan.image_picker_flutter
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
@@ -27,11 +26,7 @@ import java.util.*
  */
 internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) {
 
-    var takeImageFile = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-    } else {
-        context().getExternalFilesDir(Environment.DIRECTORY_DCIM)
-    } ?: context().filesDir
+    var takeImageFile = context().createFolder()
     takeImageFile = createFile(takeImageFile, "IMG-", ".jpg")
     val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
     takePictureIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -46,29 +41,35 @@ internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) 
         activity().startActivityForResult(takePictureIntent, REQUEST_CAMERA_IMAGE)
 
         resultListener.onCompleted = {
-            MediaScannerConnection.scanFile(context().applicationContext, arrayOf(takeImageFile.toString()), arrayOf("image/*")) { path, _ ->
-                path.logcat()
-                if (path == takeImageFile.toString()) {
-                    val imageItem = HashMap<String, Any>().apply {
-                        put("id", path)
-                        put("name", takeImageFile.name)
-                        put("path", path)
-                        put("mimeType", "image/jpg")
-                        put("time", System.currentTimeMillis())
-                        val arr = size(path)
-                        Log.e("zuiweng", arr.toString())
-                        put("width", arr[0])
-                        put("height", arr[1])
-                    }
 
-                    this.activity().runOnUiThread {
-                        result.success(imageItem)
-                    }
-                }
+            val imageItem = HashMap<String, Any>().apply {
+                put("id", takeImageFile.absolutePath)
+                put("name", takeImageFile.name)
+                put("path", takeImageFile.absolutePath)
+                put("mimeType", "image/jpg")
+                put("time", System.currentTimeMillis())
+                val arr = size(takeImageFile.absolutePath)
+                put("width", arr[0])
+                put("height", arr[1])
+            }
 
+            this.activity().runOnUiThread {
+                result.success(imageItem)
             }
         }
     }
+}
+
+fun Context.createFolder(): File {
+    val folder = File(cacheDir, "image_picker_flutter")
+    if (!folder.exists()) {
+        folder.mkdirs()
+    }
+    if (folder.isFile) {
+        folder.delete()
+        folder.mkdirs()
+    }
+    return folder
 }
 
 /**
@@ -80,11 +81,7 @@ internal fun PluginRegistry.Registrar.takePicture(result: MethodChannel.Result) 
  * 7.0 调用系统相机拍照不再允许使用Uri方式，应该替换为FileProvider
  */
 internal fun PluginRegistry.Registrar.takeVideo(result: MethodChannel.Result) {
-    var takeImageFile = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-    } else {
-        context().getExternalFilesDir(Environment.DIRECTORY_MOVIES)
-    } ?: context().filesDir
+    var takeImageFile = context().createFolder()
     takeImageFile = createFile(takeImageFile, "VIDEO-", ".mp4")
     val takePictureIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
     takePictureIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -99,23 +96,21 @@ internal fun PluginRegistry.Registrar.takeVideo(result: MethodChannel.Result) {
         activity().startActivityForResult(takePictureIntent, REQUEST_CAMERA_VIDEO)
     }
     resultListener.onCompleted = {
-        MediaScannerConnection.scanFile(context().applicationContext, arrayOf(takeImageFile.toString()), arrayOf("video/*")) { path, _ ->
-            if (path == takeImageFile.toString()) {
-                val imageItem = HashMap<String, Any>().apply {
-                    put("id", path)
-                    put("name", takeImageFile.name)
-                    put("path", path)
-                    put("mimeType", "video/mp4")
-                    put("time", System.currentTimeMillis())
-                    val arr = size(path, isImage = false)
-                    put("width", arr[0])
-                    put("height", arr[1])
-                }
-                this.activity().runOnUiThread {
-                    result.success(imageItem)
-                }
-            }
+        val imageItem = HashMap<String, Any>().apply {
+            put("id", takeImageFile.absolutePath)
+            put("name", takeImageFile.name)
+            put("path", takeImageFile.absolutePath)
+            put("mimeType", "video/mp4")
+            put("time", System.currentTimeMillis())
+            val arr = size(takeImageFile.absolutePath, isImage = false)
+            arr.logE()
+            put("width", arr[0])
+            put("height", arr[1])
         }
+        this.activity().runOnUiThread {
+            result.success(imageItem)
+        }
+
     }
 }
 
@@ -126,6 +121,7 @@ private fun createFile(folder: File, prefix: String, suffix: String): File {
     if (!folder.exists() || !folder.isDirectory) folder.mkdirs()
     val dateFormat = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
     val filename = prefix + dateFormat.format(Date(System.currentTimeMillis())) + suffix
+    folder.lastModified()
     return File(folder, filename)
 }
 
@@ -151,16 +147,28 @@ internal class ResultListener : PluginRegistry.ActivityResultListener {
 
 internal fun size(path: String, isImage: Boolean = true): Array<Int> {
     return if (isImage) {
-        val bitmap = BitmapFactory.decodeFile(path)
-        arrayOf(bitmap.width, bitmap.height)
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        BitmapFactory.decodeFile(path, options)
+        arrayOf(options.outWidth, options.outHeight)
     } else {
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(path)
-        val bitmap = retriever.frameAtTime
-        arrayOf(bitmap.width, bitmap.height)
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(path)
+        val width = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toInt()
+        val height = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toInt()
+        arrayOf(width, height)
     }
 }
 
-internal fun Any.logcat() {
-    Log.e("image_picker", this.toString())
+internal fun Any.logE() {
+    if (BuildConfig.DEBUG) {
+        Log.e("image_picker", this.toString())
+    }
+}
+
+internal fun Throwable.logT() {
+    if (BuildConfig.DEBUG) {
+        Log.e("image_picker", "", this)
+    }
 }

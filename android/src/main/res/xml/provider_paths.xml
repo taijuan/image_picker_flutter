@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <files-path name="files" path="." /> //context.getFilesDir()
-    <cache-path name="cache" path="." /> //context.getCacheDir()
-    <external-path name="external" path="." /> //Environment.getExternalStorageDirectory()
+    <cache-path name="cache" path="image_picker_flutter" /> //context.getCacheDir()
 </paths>

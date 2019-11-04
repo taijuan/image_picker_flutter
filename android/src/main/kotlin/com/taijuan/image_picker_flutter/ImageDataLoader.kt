@@ -39,7 +39,6 @@ internal fun Activity.getFolders(selection: String, result: MethodChannel.Result
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
                     val path = PathUtils.getPath(this, cursor.getUri())
-                    path.logcat()
                     val imageFile = File(path)
                     if (!imageFile.exists() || imageFile.length() <= 0) {
                         continue
@@ -64,13 +63,39 @@ internal fun Activity.getFolders(selection: String, result: MethodChannel.Result
                     }
                     allImages.add(imageItem)
                 }
+                createFolder().listFiles()?.filter {
+                    when (selection) {
+                        IMAGE_SELECTION -> it.name.contains(".jpg")
+                        VIDEO_SELECTION -> it.name.contains(".mp4")
+                        else -> true
+                    }
+                }?.forEach {
+                    val folder = it.parentFile?.absolutePath ?: "/All"
+                    if (!allFolders.contains(folder)) {
+                        allFolders.add(folder)
+                    }
+                    val imageItem = HashMap<String, Any>().apply {
+                        put("id", it.absolutePath)
+                        put("name", it.name)
+                        put("path", it.absolutePath)
+                        put("folder", folder)
+                        val isImage = it.name.contains(".jpg")
+                        put("mimeType", if (isImage) "image/jpg" else "video/mp4")
+                        put("time", it.lastModified())
+                        val arr = size(it.absolutePath, isImage = isImage)
+                        arr.logE()
+                        put("width", arr[0])
+                        put("height", arr[1])
+                    }
+                    allImages.add(imageItem)
+                }
             }
         } catch (e: Exception) {
-            e.logcat()
+            e.logT()
         } finally {
             cursor?.close()
             runOnUiThread {
-                allFolders.logcat()
+                allFolders.logE()
                 result.success(allFolders)
             }
         }
