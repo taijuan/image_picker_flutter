@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -16,7 +17,7 @@ class Utils {
   static const MethodChannel channel = const MethodChannel('image_picker');
 
   ///日志开关
-  static bool isDebug = false;
+  static bool isDebug = !kReleaseMode;
 
   static Future<List<String>> getFolders(ImagePickerType type) async {
     final List<dynamic> a = await channel.invokeMethod(

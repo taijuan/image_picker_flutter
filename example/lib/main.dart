@@ -28,7 +28,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    ImagePicker.debug(true);
     if (Platform.isAndroid) {
       PermissionHandler().requestPermissions([
         PermissionGroup.storage,
