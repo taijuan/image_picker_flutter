@@ -100,6 +100,9 @@ class _MyAppState extends State<MyApp> {
                   context,
                   data: _data,
                   mulCallback: (data) {
+                    print(data.map((a){
+                      return a.path;
+                    }));
                     setState(() {
                       _data = data;
                     });
@@ -112,6 +115,7 @@ class _MyAppState extends State<MyApp> {
             RawMaterialButton(
               onPressed: () {
                 ImagePicker.singlePicker(context, singleCallback: (data) {
+                  print(data.path);
                   setState(() {
                     _data
                       ..removeWhere((a) => a == data)
@@ -125,6 +129,7 @@ class _MyAppState extends State<MyApp> {
             RawMaterialButton(
               onPressed: () {
                 ImagePicker.takePicture((a) {
+                  print(a.path);
                   setState(() {
                     _data.add(a);
                   });
@@ -136,6 +141,7 @@ class _MyAppState extends State<MyApp> {
             RawMaterialButton(
               onPressed: () {
                 ImagePicker.takeVideo((a) {
+                  print(a.path);
                   setState(() {
                     _data.add(a);
                   });

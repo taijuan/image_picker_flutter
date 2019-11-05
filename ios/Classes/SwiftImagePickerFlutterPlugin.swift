@@ -9,6 +9,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     var result: FlutterResult? = nil;
     var allImages = Array<Dictionary<String,Any>>();
     var allFolders = Array<String>();
+    let group = DispatchGroup()
+    var work :DispatchWorkItem? = nil
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "image_picker", binaryMessenger: registrar.messenger());
         let instance = SwiftImagePickerFlutterPlugin();
@@ -20,6 +22,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             getFolders(type: call.arguments as! Int, result: result)
         }else if(call.method == "getImages"){
             getImages(folder: call.arguments as! String,result: result);
+        }else if(call.method == "getPath"){
+            getPath(id: call.arguments as!String, result: result)
         }else if(call.method == "toUInt8List"){
             let arr = call.arguments as! Array<Any>;
             toUInt8List(id: arr[0] as! String,width: arr[2] as! Int ,height: arr[3] as! Int, result: result)
@@ -36,10 +40,11 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     
     //MARK:获取对应相册数据源
     private func getFolders(type:Int,result:@escaping FlutterResult){
+        let old = Date().timeIntervalSince1970
         allImages.removeAll()
         allFolders.removeAll()
         allFolders.append("All")
-        DispatchQueue.global(qos: .default).async {
+        self.work =  DispatchWorkItem {
             let fetchOptions = PHFetchOptions()
             if(type == 1){
                 fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
@@ -47,10 +52,27 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
             }else{}
             let all = PHAsset.fetchAssets(with: fetchOptions);
+            
+            //self.awaitAllPath(all: all) 该方法耗时太久
+            //资源绝对路径改为flutter图片显示异步加载，见方法@see getPath(id:String,result:@escaping FlutterResult)
             for index in 0..<all.count{
-                let a = all[index];
-                self.allImages.append(self.getPath(asset: a, folder: "All"));
+                let asset = all[index]
+                var d = Dictionary<String,Any>();
+                d.updateValue(asset.localIdentifier, forKey: "id")
+                d.updateValue("", forKey: "path")
+                d.updateValue("", forKey: "name")
+                if(asset.mediaType == PHAssetMediaType.image){
+                    d.updateValue("image/",forKey: "mimeType");
+                }else{
+                    d.updateValue("video/",forKey: "mimeType");
+                }
+                d.updateValue(Int(asset.creationDate!.timeIntervalSince1970),forKey: "time");
+                d.updateValue(asset.pixelWidth,forKey: "width");
+                d.updateValue(asset.pixelHeight, forKey: "height");
+                d.updateValue("All", forKey: "folder")
+                self.allImages.append(d);
             }
+            
             let albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
             for index in 0..<albums.count{
                 let album = albums[index]
@@ -64,12 +86,16 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                     self.checkItem(id: a.localIdentifier,folder:folder)
                 }
             }
-            self.allFolders.append("Other")
+            let cur = Date().timeIntervalSince1970
+            logE("全部结束")
+            logE("\(cur - old)")
             DispatchQueue.main.async {
                result(self.allFolders)
             }
         }
+        DispatchQueue.global(qos: .background).async(execute: work!)
     }
+    
     
     //MARK:相册图片视频逻辑
     private func checkItem(id:String,folder:String){
@@ -89,12 +115,6 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     private func getImages(folder:String,result:@escaping FlutterResult){
         if(folder == "All"){
             result(self.allImages)
-        }else if(folder == "Other"){
-            let images: Array<Dictionary<String,Any>> = self.allImages.filter { (item) -> Bool in
-                let a:String  = item["folder"] as? String ?? ""
-                return a == "All"
-            }
-            result(images)
         }else{
             let images: Array<Dictionary<String,Any>> = self.allImages.filter { (item) -> Bool in
                 let a:String  = item["folder"] as? String ?? ""
@@ -112,82 +132,114 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         }else{
             name = path
         }
-         print(name)
+        logE(name)
         return name
     }
-    
-    private func getPath(asset:PHAsset,folder:String)->Dictionary<String,Any>{
-        var d : Dictionary<String,Any>
-        if(asset.mediaType == PHAssetMediaType.image){
-            d =  getImagePath(asset: asset)
-        }else{
-            d = getVideoPath(asset: asset)
+    //MARK：获取所用图片的路径、并且异步任务同时完成返回，一次性获取等待时间太久，该方法废弃
+    private func awaitAllPath(all:PHFetchResult<PHAsset>){
+        let old = Date().timeIntervalSince1970
+        let queue = DispatchQueue.global()
+        let group = DispatchGroup()
+        let semaphore = DispatchSemaphore(value: 16)
+        for index in 0..<all.count{
+            group.enter()
+            semaphore.wait()
+            queue.async(group: group, execute: {
+                let a = all[index];
+                self.getPath(asset: a, folder: "All",result: {d in
+                    self.allImages.append(d);
+                    semaphore.signal()
+                    group.leave()
+                })
+            })
         }
-        d.updateValue(folder, forKey: "folder")
-        return d
+        _ = group.wait(wallTimeout: DispatchWallTime.distantFuture)
+        logE("结束")
+        let cur = Date().timeIntervalSince1970
+        logE("\(cur - old)")
+    }
+    //MARK：通过PHAsset获取图片文件绝对路径
+    private func getPath(asset:PHAsset,folder:String,result:@escaping(Dictionary<String,Any>)->Void){
+        if(asset.mediaType == PHAssetMediaType.image){
+            getImagePath(asset: asset,folder: folder,result: result)
+        }else{
+            getVideoPath(asset: asset,folder: folder,result: result)
+        }
+    }
+    
+    //MARK：通过LocalIdentifiers获取图片文件绝对路径
+    private func getPath(id:String,result:@escaping FlutterResult){
+        DispatchQueue.global(qos: .background).async {
+            var path:String = ""
+            let  asset:PHAsset? = PHAsset.fetchAssets(withLocalIdentifiers: [id],options: nil).firstObject;
+            if(asset != nil){
+                self.getPath(asset: asset!, folder: "") { (d) in
+                    path = d["path"] as! String
+                    DispatchQueue.main.async{
+                        result(path)
+                    }
+                }
+            }else{
+                DispatchQueue.main.async{
+                    result(path)
+                }
+            }
+        }
     }
     //MARK:获取图片绝对路径
-    private func getImagePath(asset:PHAsset)->Dictionary<String,Any>{
-        var path:String = ""
-        let semaphore = DispatchSemaphore(value: 0)
+    private func getImagePath(asset:PHAsset,folder:String,result:@escaping(Dictionary<String,Any>)->Void){
         let options2 = PHContentEditingInputRequestOptions()
         options2.isNetworkAccessAllowed = true
-        asset.requestContentEditingInput(with: options2){(input, info) in
-            path = input?.fullSizeImageURL?.path ?? ""
-            semaphore.signal()
+        asset.requestContentEditingInput(with: options2){input, info in
+            let path:String = input?.fullSizeImageURL?.path ?? ""
+            var d = Dictionary<String,Any>();
+            d.updateValue(asset.localIdentifier, forKey: "id")
+            let name = self.getName(path: path)
+            d.updateValue(path, forKey: "path")
+            d.updateValue(name, forKey: "name")
+            d.updateValue("image/",forKey: "mimeType");
+            d.updateValue(Int(asset.creationDate!.timeIntervalSince1970),forKey: "time");
+            d.updateValue(asset.pixelWidth,forKey: "width");
+            d.updateValue(asset.pixelHeight, forKey: "height");
+            d.updateValue(folder, forKey: "folder")
+            result(d)
         }
-        _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-        var d = Dictionary<String,Any>();
-        d.updateValue(asset.localIdentifier, forKey: "id")
-        let name = self.getName(path: path)
-    
-        d.updateValue(path, forKey: "path")
-        d.updateValue(name, forKey: "name")
-        d.updateValue("image/",forKey: "mimeType");
-        d.updateValue(Int(asset.creationDate!.timeIntervalSince1970),forKey: "time");
-        d.updateValue(asset.pixelWidth,forKey: "width");
-        d.updateValue(asset.pixelHeight, forKey: "height");
-        return d
     }
     //MARK:获取视频绝对路径
-    private func getVideoPath(asset:PHAsset)->Dictionary<String,Any>{
-        var path:String = ""
-        let semaphore = DispatchSemaphore(value: 0)
-        manager.requestAVAsset(forVideo: asset, options: nil, resultHandler: {(asset,v,any) in
-            let  url = (asset as? AVURLAsset)?.url.absoluteString
-            path = url?.replacingOccurrences(of: "file://", with: "") ?? "";
-            semaphore.signal()
+    private func getVideoPath(asset:PHAsset,folder:String, result:@escaping(Dictionary<String,Any>)->Void){
+        self.manager.requestAVAsset(forVideo: asset, options: nil, resultHandler: {a,v,any in
+            let  url = (a as? AVURLAsset)?.url.absoluteString
+            let path = url?.replacingOccurrences(of: "file://", with: "") ?? "";
+            var d = Dictionary<String,Any>();
+            d.updateValue(asset.localIdentifier, forKey: "id")
+            let name = self.getName(path: path)
+            d.updateValue(path, forKey: "path")
+            d.updateValue(name, forKey: "name")
+            d.updateValue("video/",forKey: "mimeType");
+            d.updateValue(Int(asset.creationDate!.timeIntervalSince1970),forKey: "time");
+            d.updateValue(asset.pixelWidth,forKey: "width");
+            d.updateValue(asset.pixelHeight, forKey: "height");
+            d.updateValue(folder, forKey: "folder")
+            result(d)
         });
-        _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-        var d = Dictionary<String,Any>();
-        d.updateValue(asset.localIdentifier, forKey: "id")
-        let name = self.getName(path: path)
-        d.updateValue(path, forKey: "path")
-        d.updateValue(name, forKey: "name")
-        d.updateValue("video/",forKey: "mimeType");
-        d.updateValue(Int(asset.creationDate!.timeIntervalSince1970),forKey: "time");
-        d.updateValue(asset.pixelWidth,forKey: "width");
-        d.updateValue(asset.pixelHeight, forKey: "height");
-        return d
     }
     
     //MARK：FLutter不支持图片视频缩略图获取方式
     private func toUInt8List(id:String,width:Int,height:Int,result:@escaping FlutterResult){
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global(qos: .background).async {
             var data:Data?
-            let semaphore = DispatchSemaphore(value: 0)
             let  asset:PHAsset? = PHAsset.fetchAssets(withLocalIdentifiers: [id],options: nil).firstObject;
             if(asset != nil){
                 self.manager.requestImage(for: asset!, targetSize: CGSize(width: width, height: height), contentMode: .aspectFit, options: nil, resultHandler: {(image,any) in
                     data = image?.jpegData(compressionQuality: 75) ?? nil
-                    semaphore.signal()
+                    DispatchQueue.main.async{
+                        result(data)
+                    }
                 });
             }else{
-                semaphore.signal()
-            }
-             _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-            DispatchQueue.main.async{
-                result(data)
+                DispatchQueue.main.async{
+                    result(data)
+                }
             }
         }
     }
@@ -195,6 +247,9 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     //MARK：任务取消
     private func cancelAll(result:@escaping FlutterResult){
         manager.stopCachingImagesForAllAssets();
+        if(work?.isCancelled == false){
+            work?.cancel()
+        }
         result(true);
     }
     
@@ -227,52 +282,48 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     
     // MARK: 录制视频获取
     private func takeVideoData(videoUrl:NSURL,done: @escaping @convention(block) () -> Void){
-        DispatchQueue.global(qos: .default).async {
-            let semaphore = DispatchSemaphore(value: 0)
+        DispatchQueue.global(qos: .background).async {
             PHPhotoLibrary.shared().performChanges({
                 PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl.absoluteURL!)
-            }, completionHandler: {isSuccess, e in
-                if(isSuccess){
-                    let a = PHAsset.fetchAssets(with: .image, options: nil).lastObject;
+            }, completionHandler: {success, e in
+                if(success){
+                    let a = PHAsset.fetchAssets(with: .video, options: nil).lastObject;
                     if(a != nil){
-                        let a = self.getVideoPath(asset: a!)
-                        self.result?(a);
-                        self.result = nil;
-                        semaphore.signal()
+                        self.getVideoPath(asset: a!,folder: "",result: {a in
+                            self.result?(a);
+                            self.result = nil;
+                            done()
+                        })
                     }else{
-                        semaphore.signal()
+                       done()
                     }
                 }else{
-                    semaphore.signal()
+                   done()
                 }
-                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-                done()
             });
         }
     }
     
     // MARK: 拍照照片获取
     private func takePhotoData(image:UIImage,done: @escaping @convention(block) () -> Void){
-        DispatchQueue.global(qos: .default).async {
-            let semaphore = DispatchSemaphore(value: 0)
+        DispatchQueue.global(qos: .background).async {
             PHPhotoLibrary.shared().performChanges({
                 PHAssetChangeRequest.creationRequestForAsset(from:image);
-            }, completionHandler: {isSuccess, e in
-                if(isSuccess){
+            }, completionHandler: {success, e in
+                if(success){
                     let a = PHAsset.fetchAssets(with: .image, options: nil).lastObject;
                     if(a != nil){
-                        let a = self.getImagePath(asset: a!)
-                        self.result?(a);
-                        self.result = nil;
-                        semaphore.signal()
+                        self.getImagePath(asset: a!,folder: "",result: {a in
+                            self.result?(a);
+                            self.result = nil;
+                            done()
+                        })
                     }else{
-                        semaphore.signal()
+                        done()
                     }
                 }else{
-                    semaphore.signal()
+                    done()
                 }
-                 _ = semaphore.wait(timeout: DispatchTime.distantFuture)
-                done()
             });
         }
     }
@@ -297,7 +348,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 completion: nil
             );
         }else{
-            print("camera is nil");
+            logE("camera is nil");
         }
     }
 }

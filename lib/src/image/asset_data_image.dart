@@ -42,6 +42,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     assert(key == this);
 
     Uint8List bytes;
+    await Utils.updateAndGetPath(data);
     File file = File(data.path);
 
     ///判断文件是否存在

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -50,6 +51,17 @@ class Utils {
     return data;
   }
 
+  ///获取资源绝对路径，并更新path、name、mimeType
+  static Future<void> updateAndGetPath(AssetData data) async {
+    if (Platform.isIOS && (data.path == null || data.path.isEmpty)) {
+      String path = await Utils.channel.invokeMethod("getPath", data.id);
+      data.path = path;
+      data.name = path.split("/").last;
+      data.mimeType =
+          "${data.mimeType}${data.path.split(".").last.toLowerCase()}";
+    }
+  }
+
   ///取消任务
   static void cancelAll() async {
     await channel.invokeMethod("cancelAll");
@@ -59,7 +71,7 @@ class Utils {
   static Future<AssetData> takePicture() async {
     dynamic a = await channel.invokeMethod("takePicture");
     AssetData b = AssetData.fromJson(a);
-    log(a);
+    b = await convertSingleData(b);
     return b;
   }
 
@@ -67,8 +79,22 @@ class Utils {
   static Future<AssetData> takeVideo() async {
     dynamic a = await channel.invokeMethod("takeVideo");
     AssetData b = AssetData.fromJson(a);
-    log(a);
+    b = await convertSingleData(b);
     return b;
+  }
+
+  ///多选数据组合
+  static Future<List<AssetData>> convertMulData(List<AssetData> data) async {
+    for (AssetData a in data) {
+      await updateAndGetPath(a);
+    }
+    return data;
+  }
+
+  ///单选数据组合
+  static Future<AssetData> convertSingleData(AssetData data) async {
+    await updateAndGetPath(data);
+    return data;
   }
 
   ///默认的图片加载loading
