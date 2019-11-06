@@ -41,6 +41,7 @@ class Utils {
     final List<AssetData> data = a.map(
       (a) {
         AssetData b = AssetData.fromJson(a);
+        print(b.time);
         return b;
       },
     ).toList();

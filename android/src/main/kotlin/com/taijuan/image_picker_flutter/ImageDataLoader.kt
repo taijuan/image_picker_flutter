@@ -48,7 +48,10 @@ internal fun Activity.getFolders(selection: String, result: MethodChannel.Result
                         allFolders.add(folder)
                     }
                     val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE))
-                    val time = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED))
+                    /**
+                     * @see：MediaStore.MediaColumns.DATE_ADDED 单位秒
+                     */
+                    val time = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED))*1000
                     val width = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.WIDTH))
                     val height = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.HEIGHT))
                     val imageItem = HashMap<String, Any>().apply {
