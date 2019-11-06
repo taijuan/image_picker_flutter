@@ -62,9 +62,9 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
           targetHeight,
         ],
       );
-      return await ui.instantiateImageCodec(bytes);
+    }else {
+      bytes = await file.readAsBytes();
     }
-    bytes = await file.readAsBytes();
     if (bytes == null || bytes.lengthInBytes == 0) return null;
     if (targetWidth == null && targetHeight == null) {
       return await ui.instantiateImageCodec(bytes);

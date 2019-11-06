@@ -9,8 +9,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     var result: FlutterResult? = nil;
     var allImages = Array<Dictionary<String,Any>>();
     var allFolders = Array<String>();
-    let group = DispatchGroup()
-    var work :DispatchWorkItem? = nil
+    var works = Array<DispatchWorkItem>()
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "image_picker", binaryMessenger: registrar.messenger());
         let instance = SwiftImagePickerFlutterPlugin();
@@ -44,7 +43,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         allImages.removeAll()
         allFolders.removeAll()
         allFolders.append("All")
-        self.work =  DispatchWorkItem {
+        let work =  DispatchWorkItem {
             let fetchOptions = PHFetchOptions()
             if(type == 1){
                 fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
@@ -93,7 +92,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                result(self.allFolders)
             }
         }
-        DispatchQueue.global(qos: .background).async(execute: work!)
+        self.works.append(work)
+        DispatchQueue.global(qos: .background).async(execute: work)
     }
     
     
@@ -169,7 +169,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     
     //MARK：通过LocalIdentifiers获取图片文件绝对路径
     private func getPath(id:String,result:@escaping FlutterResult){
-        DispatchQueue.global(qos: .background).async {
+        let work = DispatchWorkItem {
             var path:String = ""
             let  asset:PHAsset? = PHAsset.fetchAssets(withLocalIdentifiers: [id],options: nil).firstObject;
             if(asset != nil){
@@ -185,6 +185,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 }
             }
         }
+        self.works.append(work)
+        DispatchQueue.global(qos: .background).async(execute: work)
     }
     //MARK:获取图片绝对路径
     private func getImagePath(asset:PHAsset,folder:String,result:@escaping(Dictionary<String,Any>)->Void){
@@ -230,8 +232,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             var data:Data?
             let  asset:PHAsset? = PHAsset.fetchAssets(withLocalIdentifiers: [id],options: nil).firstObject;
             if(asset != nil){
-                self.manager.requestImage(for: asset!, targetSize: CGSize(width: width, height: height), contentMode: .aspectFit, options: nil, resultHandler: {(image,any) in
-                    data = image?.jpegData(compressionQuality: 75) ?? nil
+                self.manager.requestImage(for: asset!, targetSize: PHImageManagerMaximumSize, contentMode: .aspectFill, options: nil, resultHandler: {(image,any) in
+                    data = image?.jpegData(compressionQuality: 100) ?? nil
                     DispatchQueue.main.async{
                         result(data)
                     }
@@ -247,9 +249,12 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     //MARK：任务取消
     private func cancelAll(result:@escaping FlutterResult){
         manager.stopCachingImagesForAllAssets();
-        if(work?.isCancelled == false){
-            work?.cancel()
+        for work in self.works {
+            if(!work.isCancelled){
+                work.cancel()
+            }
         }
+        self.works.removeAll()
         result(true);
     }
     
@@ -282,9 +287,15 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     
     // MARK: 录制视频获取
     private func takeVideoData(videoUrl:NSURL,done: @escaping @convention(block) () -> Void){
-        DispatchQueue.global(qos: .background).async {
+        self.createAndGetAlbum { (album) in
             PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl.absoluteURL!)
+                if album == nil {
+                    PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl.absoluteURL!)
+                }else{
+                    let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl.absoluteURL!)
+                    let assetPlaceholder = assetRequest?.placeholderForCreatedAsset!
+                    _=PHAssetCollectionChangeRequest.init(for: album!)?.addAssets([assetPlaceholder!] as NSArray)
+                }
             }, completionHandler: {success, e in
                 if(success){
                     let a = PHAsset.fetchAssets(with: .video, options: nil).lastObject;
@@ -306,9 +317,15 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
     
     // MARK: 拍照照片获取
     private func takePhotoData(image:UIImage,done: @escaping @convention(block) () -> Void){
-        DispatchQueue.global(qos: .background).async {
+        self.createAndGetAlbum { (album) in
             PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.creationRequestForAsset(from:image);
+                if album == nil {
+                    PHAssetChangeRequest.creationRequestForAsset(from:image);
+                }else{
+                    let assetRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
+                    let assetPlaceholder = assetRequest.placeholderForCreatedAsset!
+                    _=PHAssetCollectionChangeRequest.init(for: album!)?.addAssets([assetPlaceholder] as NSArray)
+                }
             }, completionHandler: {success, e in
                 if(success){
                     let a = PHAsset.fetchAssets(with: .image, options: nil).lastObject;
@@ -327,7 +344,22 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             });
         }
     }
-    
+    func createAndGetAlbum(_ done: @escaping @convention(block) (PHAssetCollection?) -> Void){
+        let albumName = "image_picker_flutter"
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate.init(format: "title = %@", albumName)
+        var albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        if let _ = albums.firstObject {
+            done(albums.firstObject)
+        }else{
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+            }) { (result, error) in
+                albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+                done(albums.firstObject)
+            }
+        }
+    }
     // MARK: 拍照与录制视频
     private func takePicker(isVideo:Bool,result:@escaping FlutterResult){
         self.result = result;
