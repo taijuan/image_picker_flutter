@@ -132,7 +132,7 @@ class SingleImagePickerPageState extends State<SingleImagePickerPage> {
           constraints: BoxConstraints.expand(),
           onPressed: () {
             LoadingDialog.showLoadingDialog(context);
-            Utils.convertSingleData(data).whenComplete((){
+            Utils.convertSingleData(data).whenComplete(() {
               Navigator.of(context)..pop()..pop(data);
             });
           },

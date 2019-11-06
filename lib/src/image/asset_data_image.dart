@@ -62,7 +62,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
           targetHeight,
         ],
       );
-    }else {
+    } else {
       bytes = await file.readAsBytes();
     }
     if (bytes == null || bytes.lengthInBytes == 0) return null;
