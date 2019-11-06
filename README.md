@@ -17,6 +17,10 @@
 
 ## 使用说明
 
+### Android 必须添加Kotlin依赖
+
+### Ios 必须是Swift创建的项目
+
 ### dependencies in flutter
 
 ```
