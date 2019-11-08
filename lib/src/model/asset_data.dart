@@ -1,6 +1,5 @@
-import 'dart:io';
-
 class AssetData {
+  ///ios id与path不一致，Android id与path相同
   String id;
   String name;
   String path;
@@ -36,11 +35,7 @@ class AssetData {
   @override
   bool operator ==(Object other) {
     if (other is AssetData && runtimeType == other.runtimeType) {
-      if (Platform.isIOS) {
-        return id == other.id;
-      } else {
-        return path == other.path;
-      }
+      return id == other.id;
     } else {
       return false;
     }
@@ -48,10 +43,6 @@ class AssetData {
 
   @override
   int get hashCode {
-    if (Platform.isIOS) {
-      return id.hashCode;
-    } else {
-      return path.hashCode;
-    }
+    return id.hashCode;
   }
 }
