@@ -26,7 +26,6 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     return SynchronousFuture<AssetDataImage>(this);
   }
 
-
   @override
   ImageStreamCompleter load(AssetDataImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
@@ -39,7 +38,8 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(AssetDataImage key,DecoderCallback decode) async {
+  Future<ui.Codec> _loadAsync(
+      AssetDataImage key, DecoderCallback decode) async {
     assert(key == this);
 
     Uint8List bytes;
