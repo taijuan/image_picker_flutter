@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' as ui show Codec;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -26,10 +26,11 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     return SynchronousFuture<AssetDataImage>(this);
   }
 
+
   @override
-  ImageStreamCompleter load(AssetDataImage key) {
+  ImageStreamCompleter load(AssetDataImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
       informationCollector: () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
@@ -38,11 +39,10 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(AssetDataImage key) async {
+  Future<ui.Codec> _loadAsync(AssetDataImage key,DecoderCallback decode) async {
     assert(key == this);
 
     Uint8List bytes;
-    await Utils.updateAndGetPath(data);
     File file = File(data.path);
 
     ///判断文件是否存在
@@ -62,25 +62,25 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
           targetHeight,
         ],
       );
-    } else {
-      bytes = await file.readAsBytes();
+      return await decode(bytes);
     }
+    bytes = await file.readAsBytes();
     if (bytes == null || bytes.lengthInBytes == 0) return null;
     if (targetWidth == null && targetHeight == null) {
-      return await ui.instantiateImageCodec(bytes);
+      return await decode(bytes);
     } else if (targetWidth <= 0 && targetHeight == null) {
-      return await ui.instantiateImageCodec(bytes);
+      return await decode(bytes);
     } else if (targetWidth > 0 && targetHeight == null) {
-      return await ui.instantiateImageCodec(
+      return await decode(
         bytes,
-        targetWidth: targetWidth > data.width ? targetWidth : -1,
+        cacheWidth: targetWidth > data.width ? targetWidth : -1,
       );
     } else if (targetWidth == null && targetHeight <= 0) {
-      return await ui.instantiateImageCodec(bytes);
+      return await decode(bytes);
     } else if (targetWidth == null && targetHeight > 0) {
-      return await ui.instantiateImageCodec(
+      return await decode(
         bytes,
-        targetHeight: targetHeight > data.height ? targetHeight : -1,
+        cacheHeight: targetHeight > data.height ? targetHeight : -1,
       );
     } else {
       int w = data.width;
@@ -93,10 +93,10 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
       Utils.log("width：${data.width},height：${data.height}");
       Utils.log("targetWidth：$targetWidth,targetHeight：$targetHeight");
       Utils.log("w：$w,h：$h");
-      return await ui.instantiateImageCodec(
+      return await decode(
         bytes,
-        targetWidth: w,
-        targetHeight: h,
+        cacheWidth: w,
+        cacheHeight: h,
       );
     }
   }
