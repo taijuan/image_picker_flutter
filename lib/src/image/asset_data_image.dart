@@ -42,6 +42,7 @@ class AssetDataImage extends ImageProvider<AssetDataImage> {
       AssetDataImage key, DecoderCallback decode) async {
     assert(key == this);
 
+    await Utils.updateAndGetPath(data);
     Uint8List bytes;
     File file = File(data.path);
 

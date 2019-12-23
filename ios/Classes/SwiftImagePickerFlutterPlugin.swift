@@ -15,7 +15,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         let instance = SwiftImagePickerFlutterPlugin();
         registrar.addMethodCallDelegate(instance, channel: channel);
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if(call.method == "getFolders"){
             getFolders(type: call.arguments as! Int, result: result)
@@ -36,7 +36,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             result(FlutterMethodNotImplemented)
         }
     }
-    
+
     //MARK:获取对应相册数据源
     private func getFolders(type:Int,result:@escaping FlutterResult){
         let old = Date().timeIntervalSince1970
@@ -51,7 +51,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
             }else{}
             let all = PHAsset.fetchAssets(with: fetchOptions);
-            
+
             //self.awaitAllPath(all: all) 该方法耗时太久
             //资源绝对路径改为flutter图片显示异步加载，见方法@see getPath(id:String,result:@escaping FlutterResult)
             for index in 0..<all.count{
@@ -71,7 +71,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 d.updateValue("All", forKey: "folder")
                 self.allImages.append(d);
             }
-            
+
             let albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
             for index in 0..<albums.count{
                 let album = albums[index]
@@ -95,8 +95,8 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         self.works.append(work)
         DispatchQueue.global(qos: .background).async(execute: work)
     }
-    
-    
+
+
     //MARK:相册图片视频逻辑
     private func checkItem(id:String,folder:String){
         let index = allImages.firstIndex { (d) -> Bool in
@@ -123,7 +123,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             result(images)
         }
     }
-    
+
     //Mark:获取文件名
     private func getName(path:String)->String{
         var name = ""
@@ -166,7 +166,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             getVideoPath(asset: asset,folder: folder,result: result)
         }
     }
-    
+
     //MARK：通过LocalIdentifiers获取图片文件绝对路径
     private func getPath(id:String,result:@escaping FlutterResult){
         let work = DispatchWorkItem {
@@ -225,7 +225,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             result(d)
         });
     }
-    
+
     //MARK：FLutter不支持图片视频缩略图获取方式
     private func toUInt8List(id:String,width:Int,height:Int,result:@escaping FlutterResult){
         DispatchQueue.global(qos: .background).async {
@@ -245,7 +245,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             }
         }
     }
-    
+
     //MARK：任务取消
     private func cancelAll(result:@escaping FlutterResult){
         manager.stopCachingImagesForAllAssets();
@@ -257,7 +257,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         self.works.removeAll()
         result(true);
     }
-    
+
     //MARK：拍照录制视频回调
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let mediaType = info[.mediaType] as! String;
@@ -282,9 +282,9 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
         }else{
             picker.dismiss(animated: true, completion: nil);
         }
-        
+
     }
-    
+
     // MARK: 录制视频获取
     private func takeVideoData(videoUrl:NSURL,done: @escaping @convention(block) () -> Void){
         self.createAndGetAlbum { (album) in
@@ -314,7 +314,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
             });
         }
     }
-    
+
     // MARK: 拍照照片获取
     private func takePhotoData(image:UIImage,done: @escaping @convention(block) () -> Void){
         self.createAndGetAlbum { (album) in
