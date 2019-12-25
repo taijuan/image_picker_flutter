@@ -72,7 +72,7 @@ public class SwiftImagePickerFlutterPlugin: NSObject, FlutterPlugin ,UINavigatio
                 self.allImages.append(d);
             }
 
-            let albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+            let albums = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: nil)
             for index in 0..<albums.count{
                 let album = albums[index]
                 let folder:String = album.localizedTitle ?? ""
